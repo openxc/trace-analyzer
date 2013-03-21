@@ -14,3 +14,7 @@
     width: 300px;
     height: 60px;
 }
+
+#download-progress {
+    font-weight: bold
+}

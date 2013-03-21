@@ -47,17 +47,37 @@ function handleMessage(message) {
     }
 }
 
+function updateTraceDownloadProgress(progress) {
+    $($("#download-progress progress")).attr("value", progress);
+    $($("#download-progress progress")).text(progress + "%");
+}
+
 function loadTrace() {
     $.ajax({
-      url: $("#trace-1").attr("href"),
-      success: function(data) {
-          $.each(data.split("\n"), function(i, line) {
-              if(line) {
-                  handleMessage(JSON.parse(line));
-              }
-          });
-      },
-      dataType: "text"
+        xhr: function() {
+            var xhr = new window.XMLHttpRequest();
+            xhr.addEventListener("progress", function(evt){
+                if(evt.lengthComputable) {
+                    var percentComplete = evt.loaded / evt.total;
+                    updateTraceDownloadProgress(percentComplete * 100);
+                }
+            }, false);
+            return xhr;
+        },
+        url: $("#trace-1").attr("href"),
+        success: function(data) {
+            $("#download-progress").text("Trace download complete.");
+            setTimeout(function() {
+                $("#download-progress").hide();
+            }, 8);
+
+            $.each(data.split("\n"), function(i, line) {
+                if(line) {
+                    handleMessage(JSON.parse(line));
+                }
+            });
+        },
+        dataType: "text"
     });
 }
 
