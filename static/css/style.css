@@ -2,3 +2,15 @@
     height: 800px;
     width: 770px;
 }
+
+path {
+    stroke: steelblue;
+    stroke-width: 1;
+    fill: none;
+}
+
+.graph {
+    position: absolute;
+    width: 300px;
+    height: 60px;
+}

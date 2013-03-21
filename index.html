@@ -12,6 +12,7 @@
     <script src="//code.jquery.com/jquery-1.9.1.min.js"></script>
     <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
     <script src="http://d3js.org/d3.v3.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore-min.js"></script>
     <script src="/static/js/app.js"></script>
 
 </head>
@@ -23,6 +24,7 @@
                 <div id="map"></div>
             </div>
             <div class="span4">
+                <h1>OpenXC Visualization</h1>
                 <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.
                     Morbi et rhoncus odio. Nam sit amet mi leo, nec ultrices est. Nam nec enim ut
                     tortor tempor euismod eget sit amet lacus. Mauris magna tortor, volutpat tempus
@@ -50,10 +52,12 @@
 
         <div class="row">
             <div class="span6">
-                <div id="speed_chart"></div>
+                <h2>Speed</h2>
+                <div id="speed" class="graph"></div>
             </div>
             <div class="span6">
-                <div id="odometer_chart"></div>
+                <h2>Distance</h2>
+                <div id="odometer" class="graph"></div>
             </div>
         </div>
     </div>
