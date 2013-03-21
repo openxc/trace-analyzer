@@ -1,12 +1,18 @@
 var path;
 var pathHead;
 var map;
-var ourPathHead;
+var speedTimestamps = [];
+var speedValues = [];
+
+var odoTimestamps = [];
+var odoValues = [];
+
+var graph;
 
 function drawSparkline(elementId, width, height, dataX, domainX, dataY,
         domainY) {
     // create an SVG element inside the element that fills 100% of the div
-    var graph = d3.select(elementId).append("svg:svg").attr("width",
+    graph = d3.select(elementId).append("svg:svg").attr("width",
         "100%").attr("height", "100%");
 
     // X scale will fit values from 0-10 within range of pixels
@@ -37,6 +43,14 @@ function handleMessage(message) {
         position.latitude = message.value;
     } else if(message.name === "longitude") {
         position.longitude = message.value;
+    } else if(message.name === "odometer") {
+        odoTimestamps = message.timestamp;
+        odoValues = message.value;
+        graph.selectAll("path").data([data]) // set the new data
+                .attr("d", line); // apply the new data values
+    } else if(message.name === "vehicle_speed") {
+        speedTimestamps = message.timestamp;
+        speedValues = message.value;
     }
 
     if(position.latitude && position.longitude) {
