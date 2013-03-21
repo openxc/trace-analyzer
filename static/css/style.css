@@ -1,9 +1,9 @@
 #map {
-    height: 800px;
+    height: 600px;
     width: 770px;
 }
 
-path {
+.graph path {
     stroke: steelblue;
     stroke-width: 1;
     fill: none;
