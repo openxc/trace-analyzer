@@ -7,35 +7,34 @@ var speedValues = [];
 var odoTimestamps = [];
 var odoValues = [];
 
-var graph;
+var graphs = {};;
 
 var traces = {};
 
-function drawSparkline(elementId, width, height, dataX, domainX, dataY,
-        domainY) {
+function drawSparkline(elementId, width, height, dataX, dataY) {
     // create an SVG element inside the element that fills 100% of the div
-    graph = d3.select(elementId).append("svg:svg").attr("width",
+    var graph = d3.select(elementId).append("svg:svg").attr("width",
         "100%").attr("height", "100%");
 
     // X scale will fit values from 0-10 within range of pixels
-    var x = d3.scale.linear().domain(domainX).range([0, width]);
+    var x = d3.scale.linear().domain([_.min(dataX), _.max(dataX)]).range([0, width]);
     // Y scale will fit values from 0-10 within pixels 0-100
-    var y = d3.scale.linear().domain(domainY).range([0, height]);
+    var y = d3.scale.linear().domain([_.min(dataY), _.max(dataY)]).range([height, 0]);
 
     // create a line object that represents the SVN line we're creating
     var line = d3.svg.line()
-    // assign the X function to plot our line as we wish
     .x(function(d,i) {
-        // return the X coordinate where we want to plot this datapoint
-        return x(i);
+        // console.log('Plotting X value for data point: ' + d + ' using index: ' + i + ' to be at: ' + x(i) + ' using our xScale.');
+        return x(d[0]);
     })
     .y(function(d) {
-        // return the Y coordinate where we want to plot this datapoint
-        return y(d);
+        // console.log('Plotting Y value for data point: ' + d + ' to be at: ' + y(d) + " using our yScale.");
+        return y(d[1]);
     })
 
     // display the line by appending an svg:path element with the data line we created above
-    graph.append("svg:path").attr("d", line(dataX));
+    graph.append("svg:path").attr("d", line(_.zip(dataX, dataY)));
+    return graph;
 }
 
 function handleMessage(traceName, message) {
@@ -72,8 +71,7 @@ function renderGpsTrace(traceName) {
     map.fitBounds(path.getBounds());
 }
 
-function loadTrace() {
-    var selectedTrace = $("#traces .active").attr("href");
+function loadTrace(selectedTrace) {
     $.ajax({
         xhr: function() {
             var xhr = new window.XMLHttpRequest();
@@ -99,6 +97,9 @@ function loadTrace() {
             });
 
             renderGpsTrace(selectedTrace);
+            var speeds = traces[selectedTrace].vehicle_speed;
+            graphs.speed = drawSparkline("#speed", 200, 50,
+                _.pluck(speeds, "timestamp"), _.pluck(speeds, "value"));
         },
         dataType: "text"
     });
@@ -112,14 +113,11 @@ $(document).ready(function() {
         maxZoom: 16
     }).addTo(map);
 
+
     // create a red polyline from an arrays of LatLng points
     path = L.polyline([], {color: 'red', width: 20}).addTo(map);
     pathHead = L.circle(startingPosition, 25).addTo(map);
 
-    loadTrace();
-    drawSparkline("#speed", 200, 50, _.range(200), [0, 10],
-            _.range(200), [0, 10]);
-
-    drawSparkline("#odometer", 200, 50, _.range(200), [0, 10],
-            _.range(200), [0, 10]);
+    var selectedTrace = $("#traces .active").attr("href");
+    loadTrace(selectedTrace);
 });
