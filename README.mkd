@@ -3,6 +3,16 @@ OpenXC Vehicle Trace Analysis Tools
 
 * Version: 0.1
 
+## Running the Visualization
+
+If you have Python 2:
+
+    trace-analyzer/$ python -m SimpleHTTPServer
+
+and if you have Python 3:
+
+    trace-analyzer/$ python -m http.server
+
 License
 =======
 
