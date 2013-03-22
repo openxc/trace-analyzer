@@ -11,15 +11,17 @@ var graphs = {};
 
 var traces = {};
 
-function drawSparkline(elementId, width, height, dataX, dataY) {
+function drawSparkline(elementId, dataX, dataY) {
     // create an SVG element inside the element that fills 100% of the div
     var graph = d3.select(elementId).append("svg:svg").attr("width",
         "100%").attr("height", "100%");
 
     // X scale will fit values from 0-10 within range of pixels
-    var x = d3.scale.linear().domain([_.min(dataX), _.max(dataX)]).range([0, width]);
+    var x = d3.scale.linear().domain([_.min(dataX), _.max(dataX)]).range(
+            [0, $(elementId).width()]);
     // Y scale will fit values from 0-10 within pixels 0-100
-    var y = d3.scale.linear().domain([_.min(dataY), _.max(dataY)]).range([height, 0]);
+    var y = d3.scale.linear().domain([_.min(dataY), _.max(dataY)]).range(
+            [$(elementId).height(), 0]);
 
     // create a line object that represents the SVN line we're creating
     var line = d3.svg.line()
@@ -98,11 +100,11 @@ function loadTrace(selectedTrace) {
 
             renderGpsTrace(selectedTrace);
             var speeds = traces[selectedTrace].vehicle_speed;
-            graphs.speed = drawSparkline("#speed", 200, 50,
+            graphs.speed = drawSparkline("#speed",
                 _.pluck(speeds, "timestamp"), _.pluck(speeds, "value"));
 
             var odometer = traces[selectedTrace].odometer;
-            graphs.odometer = drawSparkline("#odometer", 200, 50,
+            graphs.odometer = drawSparkline("#odometer",
                 _.pluck(odometer, "timestamp"), _.pluck(odometer, "value"));
         },
         dataType: "text"
