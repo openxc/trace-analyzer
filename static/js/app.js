@@ -7,22 +7,22 @@ var hoverMapMarker;
 
 var initDimensions = function(elementId) {
     // automatically size to the container using JQuery to get width/height
-    width = $(elementId).width();
-    height = $(elementId).height();
+    width = $("#" + elementId).width();
+    height = $("#" + elementId).height();
 
     // make sure to use offset() and not position() as we want it relative to
     // the document, not its parent
-    xOffset = $(elementId).offset().left;
-    yOffset = $(elementId).offset().top;
+    xOffset = $("#" + elementId).offset().left;
+    yOffset = $("#" + elementId).offset().top;
     return {width: width, height: height, xOffset: xOffset, yOffset: yOffset};
 }
 
 
 function drawTimeseries(traceName, elementId, dataX, dataY) {
     // create an SVG element inside the element that fills 100% of the div
-    var graph = d3.select(elementId).append("svg:svg").attr("width", "100%")
+    var graph = d3.select("#" + elementId).append("svg:svg").attr("width", "100%")
             .attr("height", "100%");
-            hoverContainer = $(elementId + " svg");
+            hoverContainer = $("#" + elementId + " svg");
 
     var dimensions = initDimensions(elementId);
 
@@ -53,8 +53,9 @@ function drawTimeseries(traceName, elementId, dataX, dataY) {
     // display the line by appending an svg:path element with the data line we created above
     graph.append("svg:path").attr("d", line(_.zip(dataX, dataY)));
 
-    var graphHolder = {graph: graph, x: x, y: y, hoverLine: hoverLine,
-            dimensions: dimensions};
+    var graphHolder = {elementId: elementId, graph: graph, x: x, y: y,
+            hoverLine: hoverLine, dimensions: dimensions, dataX: dataX,
+            dataY: dataY};
 
     $(hoverContainer).mouseleave(function(event) {
         handleMouseOutGraph(event);
@@ -68,11 +69,20 @@ function drawTimeseries(traceName, elementId, dataX, dataY) {
 }
 
 var handleMouseOutGraph = function(event) {
-    _.each(_.pluck(graphs, "hoverLine"), function(hoverLine, i) {
-        hoverLine.classed("hide", true);
+    _.each(graphs, function(graph, i) {
+        graph.hoverLine.classed("hide", true);
+        $("#current_" + graph.elementId).parent().hide();
     });
     map.removeLayer(hoverMapMarker);
     // TODO hide the labels setValueLabelsToLatest();
+}
+
+// TODO no steady step in the graphs, so we can ball park it or brute force
+// TODO is this zipped data available through the graph?
+var findClosestToX = function(targetX, dataX, dataY) {
+    return _.find(_.zip(dataX, dataY), function(element) {
+        return element[0] > targetX - 1 && element[0] < targetX + 1;
+    });
 }
 
 var handleMouseOverGraph = function(event, traceName, graph) {
@@ -81,22 +91,24 @@ var handleMouseOverGraph = function(event, traceName, graph) {
 
     if(mouseX >= 0 && mouseX <= graph.dimensions.width && mouseY >= 0 &&
             mouseY <= graph.dimensions.height) {
-        _.each(_.pluck(graphs, "hoverLine"), function(hoverLine, i) {
-            hoverLine.classed("hide", false);
+        var hoveredTimestamp = graph.x.invert(mouseX);
+
+        _.each(graphs, function(otherGraph, i) {
+            otherGraph.hoverLine.classed("hide", false);
 
             // set position of hoverLine
-            hoverLine.attr("x1", mouseX).attr("x2", mouseX)
-            // TODO displayValueLabelsForPositionX(mouseX)
+            otherGraph.hoverLine.attr("x1", mouseX).attr("x2", mouseX)
+
+            var hoveredValue = findClosestToX(hoveredTimestamp,
+                    otherGraph.dataX, otherGraph.dataY)[1];
+                $("#current_" + otherGraph.elementId).text(hoveredValue.toFixed(2)).parent().show();
         });
 
-        var hoveredTimestamp = graph.x.invert(mouseX);
         // TODO find closest timestamp in trace
         var latitudes = traces[traceName].latitude;
         var longitudes = traces[traceName].longitude;
-        var closestPosition = _.find(_.zip(latitudes, longitudes), function(position) {
-            var timestamp = position[0].timestamp ;
-            return timestamp > hoveredTimestamp - 1 && timestamp < hoveredTimestamp + 1;
-        });
+        var closestPosition = findClosestToX(hoveredTimestamp,
+            _.pluck(latitudes, "timestamp"), _.zip(latitudes, longitudes))[1];
 
         if(!hoverMapMarker) {
             hoverMapMarker = L.marker([0, 0]);
@@ -218,7 +230,7 @@ function loadTrace(selectedTrace) {
                     "torque_at_transmission", "accelerator_pedal_position",
                     "fuel_consumed_since_restart"], function(key, i) {
                 var data = traces[selectedTrace][key];
-                graphs[key] = drawTimeseries(selectedTrace, "#" + key,
+                graphs[key] = drawTimeseries(selectedTrace, key,
                     _.pluck(data, "timestamp"), _.pluck(data, "value"));
             });
 
