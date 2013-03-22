@@ -83,8 +83,9 @@ function renderGpsTrace(traceName) {
             path.addLatLng([latitudes[i].value, longitudes[i].value]);
         }
 
-        var start = L.marker(path.getLatLngs()[0]);
-        var end = L.marker(path.getLatLngs()[path.getLatLngs().length - 1]);
+        var start = L.marker(path.getLatLngs()[0], {title: "Start"});
+        var end = L.marker(path.getLatLngs()[path.getLatLngs().length - 1],
+                {title: "End"});
         activeLayer = mapLayerGroups[traceName] = L.featureGroup([path, start, end]);
     }
 
