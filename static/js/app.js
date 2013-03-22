@@ -60,6 +60,7 @@ function updateTraceDownloadProgress(progress) {
     $($("#download-progress progress")).attr("value", progress);
     $($("#download-progress progress")).text(progress + "%");
 }
+// TODO show renering progress if it takes a while
 
 function renderGpsTrace(traceName) {
     var latitudes = traces[traceName].latitude;
@@ -98,14 +99,16 @@ function loadTrace(selectedTrace) {
                 }
             });
 
-            renderGpsTrace(selectedTrace);
-            var speeds = traces[selectedTrace].vehicle_speed;
-            graphs.speed = drawSparkline("#speed",
-                _.pluck(speeds, "timestamp"), _.pluck(speeds, "value"));
 
-            var odometer = traces[selectedTrace].odometer;
-            graphs.odometer = drawSparkline("#odometer",
-                _.pluck(odometer, "timestamp"), _.pluck(odometer, "value"));
+            $.each(["vehicle_speed", "engine_speed", "odometer",
+                    "torque_at_transmission", "accelerator_pedal_position",
+                    "fuel_consumed_since_restart"], function(i, key) {
+                var data = traces[selectedTrace][key];
+                graphs[key] = drawSparkline("#" + key,
+                    _.pluck(data, "timestamp"), _.pluck(data, "value"));
+            });
+
+            renderGpsTrace(selectedTrace);
         },
         dataType: "text"
     });

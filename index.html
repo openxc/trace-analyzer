@@ -45,10 +45,10 @@
 
         <div class="row">
             <div class="span7 graph-container">
-                <div id="speed" class="graph"></div>
+                <div id="vehicle_speed" class="graph"></div>
             </div>
             <div class="span4 graph-comments">
-                <h3>Speed</h3>
+                <h3>Vehicle Speed</h3>
             </div>
         </div>
         <div class="row">
@@ -59,12 +59,45 @@
                 <h3>Distance</h3>
             </div>
         </div>
+        <div class="row">
+            <div class="span7 graph-container">
+                <div id="engine_speed" class="graph"></div>
+            </div>
+            <div class="span4 graph-comments">
+                <h3>Engine Speed</h3>
+            </div>
+        </div>
+        <div class="row">
+            <div class="span7 graph-container">
+                <div id="torque_at_transmission" class="graph"></div>
+            </div>
+            <div class="span4 graph-comments">
+                <h3>Torque</h3>
+            </div>
+        </div>
+        <div class="row">
+            <div class="span7 graph-container">
+                <div id="accelerator_pedal_position" class="graph"></div>
+            </div>
+            <div class="span4 graph-comments">
+                <h3>Accelerator Pedal Percentage</h3>
+            </div>
+        </div>
+        <div class="row">
+            <div class="span7 graph-container">
+                <div id="fuel_consumed_since_restart" class="graph"></div>
+            </div>
+            <div class="span4 graph-comments">
+                <h3>Fuel Consumed</h3>
+            </div>
+        </div>
 
         <div id="traces">
             <a class="" href="/files/annarbor.json"/>
             <a class="" href="/files/commute.json"/>
             <a class="active" href="/files/commute-short.json"/>
             <a class="" href="http://openxcplatform.com.s3.amazonaws.com/traces/localwithgps.json"/>
+            <a class="" href="http://openxcplatform.com.s3.amazonaws.com/traces/commute.json"/>
         </div>
     </div>
 </html>

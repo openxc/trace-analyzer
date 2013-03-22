@@ -9,8 +9,8 @@
 }
 
 .graph-container {
-    padding-top: 30px;
-    padding-bottom: 30px;
+    padding-top: 10px;
+    padding-bottom: 15px;
     height: 100px;
     border-bottom: 1px solid lightgrey;
 }
