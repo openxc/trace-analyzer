@@ -2,6 +2,8 @@ var map;
 var graphs = {};
 var traces = {};
 var mapLayerGroups = {};
+var activeMapLayer = undefined;
+var hoverMapMarker;
 
 var initDimensions = function(elementId) {
     // automatically size to the container using JQuery to get width/height
@@ -16,7 +18,7 @@ var initDimensions = function(elementId) {
 }
 
 
-function drawTimeseries(elementId, dataX, dataY) {
+function drawTimeseries(traceName, elementId, dataX, dataY) {
     // create an SVG element inside the element that fills 100% of the div
     var graph = d3.select(elementId).append("svg:svg").attr("width", "100%")
             .attr("height", "100%");
@@ -48,31 +50,37 @@ function drawTimeseries(elementId, dataX, dataY) {
         .attr("y1", 0).attr("y2", dimensions.height);
     hoverLine.classed("hide", true);
 
+    // display the line by appending an svg:path element with the data line we created above
+    graph.append("svg:path").attr("d", line(_.zip(dataX, dataY)));
+
+    var graphHolder = {graph: graph, x: x, y: y, hoverLine: hoverLine,
+            dimensions: dimensions};
+
     $(hoverContainer).mouseleave(function(event) {
         handleMouseOutGraph(event);
     });
 
     $(hoverContainer).mousemove(function(event) {
-        handleMouseOverGraph(event, dimensions);
+        handleMouseOverGraph(event, traceName, graphHolder);
     });
 
-    // display the line by appending an svg:path element with the data line we created above
-    graph.append("svg:path").attr("d", line(_.zip(dataX, dataY)));
-    return {graph: graph, hoverLine: hoverLine, dimensions: dimensions};
+    return graphHolder;
 }
 
-var handleMouseOutGraph = function(event, hoverLine) {
+var handleMouseOutGraph = function(event) {
     _.each(_.pluck(graphs, "hoverLine"), function(hoverLine, i) {
         hoverLine.classed("hide", true);
     });
+    map.removeLayer(hoverMapMarker);
     // TODO hide the labels setValueLabelsToLatest();
 }
 
-var handleMouseOverGraph = function(event, dimensions) {
-    var mouseX = event.pageX - dimensions.xOffset;
-    var mouseY = event.pageY - dimensions.yOffset;
+var handleMouseOverGraph = function(event, traceName, graph) {
+    var mouseX = event.pageX - graph.dimensions.xOffset;
+    var mouseY = event.pageY - graph.dimensions.yOffset;
 
-    if(mouseX >= 0 && mouseX <= dimensions.width && mouseY >= 0 && mouseY <= dimensions.height) {
+    if(mouseX >= 0 && mouseX <= graph.dimensions.width && mouseY >= 0 &&
+            mouseY <= graph.dimensions.height) {
         _.each(_.pluck(graphs, "hoverLine"), function(hoverLine, i) {
             hoverLine.classed("hide", false);
 
@@ -80,6 +88,21 @@ var handleMouseOverGraph = function(event, dimensions) {
             hoverLine.attr("x1", mouseX).attr("x2", mouseX)
             // TODO displayValueLabelsForPositionX(mouseX)
         });
+
+        var hoveredTimestamp = graph.x.invert(mouseX);
+        // TODO find closest timestamp in trace
+        var latitudes = traces[traceName].latitude;
+        var longitudes = traces[traceName].longitude;
+        var closestPosition = _.find(_.zip(latitudes, longitudes), function(position) {
+            var timestamp = position[0].timestamp ;
+            return timestamp > hoveredTimestamp - 1 && timestamp < hoveredTimestamp + 1;
+        });
+
+        if(!hoverMapMarker) {
+            hoverMapMarker = L.marker([0, 0]);
+        }
+        hoverMapMarker.setLatLng([closestPosition[0].value,
+                closestPosition[1].value]).addTo(map);
     } else {
         handleMouseOutGraph(event);
     }
@@ -109,10 +132,9 @@ function updateTraceDownloadProgress(progress) {
 // TODO show renering progress if it takes a while
 
 function renderGpsTrace(traceName) {
-    var activeLayer = undefined;
     _.each(mapLayerGroups, function(layer, layerName) {
         if(layerName === traceName) {
-            activeLayer = map.addLayer(layer);
+            activeMapLayer = map.addLayer(layer);
         } else {
             map.removeLayer(layer);
         }
@@ -127,13 +149,15 @@ function renderGpsTrace(traceName) {
             path.addLatLng([latitudes[i].value, longitudes[i].value]);
         }
 
-        var start = L.marker(_.last(path.getLatLngs()), {title: "Start"});
-        var end = L.marker(_.last(path.getLatLngs()), {title: "End"});
-        activeLayer = mapLayerGroups[traceName] = L.featureGroup([path, start, end]);
+        var start = new L.CircleMarker(_.first(path.getLatLngs()),
+                {color: "blue"});
+        var end = new L.CircleMarker(_.last(path.getLatLngs()),
+                {color: "green"});
+        activeMapLayer = mapLayerGroups[traceName] = L.featureGroup([path, start, end]);
     }
 
-    map.addLayer(activeLayer);
-    map.fitBounds(activeLayer.getBounds());
+    map.addLayer(activeMapLayer);
+    map.fitBounds(activeMapLayer.getBounds());
     updateGasPrices(traceName, map.getCenter());
 }
 
@@ -194,7 +218,7 @@ function loadTrace(selectedTrace) {
                     "torque_at_transmission", "accelerator_pedal_position",
                     "fuel_consumed_since_restart"], function(key, i) {
                 var data = traces[selectedTrace][key];
-                graphs[key] = drawTimeseries("#" + key,
+                graphs[key] = drawTimeseries(selectedTrace, "#" + key,
                     _.pluck(data, "timestamp"), _.pluck(data, "value"));
             });
 
