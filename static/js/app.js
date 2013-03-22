@@ -1,16 +1,6 @@
-var path;
-var pathHead;
 var map;
-var speedTimestamps = [];
-var speedValues = [];
-
-var odoTimestamps = [];
-var odoValues = [];
-
 var graphs = {};
-
 var traces = {};
-
 var mapLayerGroups = {};
 
 function drawSparkline(elementId, dataX, dataY) {
@@ -83,14 +73,42 @@ function renderGpsTrace(traceName) {
             path.addLatLng([latitudes[i].value, longitudes[i].value]);
         }
 
-        var start = L.marker(path.getLatLngs()[0], {title: "Start"});
-        var end = L.marker(path.getLatLngs()[path.getLatLngs().length - 1],
-                {title: "End"});
+        var start = L.marker(_.last(path.getLatLngs()), {title: "Start"});
+        var end = L.marker(_.last(path.getLatLngs()), {title: "End"});
         activeLayer = mapLayerGroups[traceName] = L.featureGroup([path, start, end]);
     }
 
     map.addLayer(activeLayer);
     map.fitBounds(activeLayer.getBounds());
+    updateGasPrices(traceName, map.getCenter());
+}
+
+function updateGasPrices(traceName, position) {
+    var gasDistance = 5;
+    var apiKey = "rfej9napna";
+    $.ajax({
+        url: "http://devapi.mygasfeed.com/stations/radius/" +
+            position.lat + "/" + position.lng + "/" + gasDistance +
+            "/reg/price/" + apiKey + ".json",
+        dataType: "jsonp",
+        success: function(data) {
+            var stations = data["stations"];
+            if(stations && stations.length > 0) {
+                var stationsWithPrice = _.filter(stations, function(station) {
+                    return station.price != "N/A";
+                });
+
+                var averagePrice = _.reduce(stationsWithPrice,
+                        function(memo, station) {
+                            return memo + parseInt(station.price);
+                        }, 0) / stationsWithPrice.length;
+
+                $("#total-fuel-cost").text((averagePrice *
+                        calculateFuelConsumedGallons(traceName)).toFixed(2));
+                $("#average-fuel-cost").text(averagePrice.toFixed(2));
+            }
+        }
+    });
 }
 
 function loadTrace(selectedTrace) {
@@ -118,7 +136,6 @@ function loadTrace(selectedTrace) {
                 }
             });
 
-
             _.each(["vehicle_speed", "engine_speed", "odometer",
                     "torque_at_transmission", "accelerator_pedal_position",
                     "fuel_consumed_since_restart"], function(key, i) {
@@ -128,9 +145,20 @@ function loadTrace(selectedTrace) {
             });
 
             renderGpsTrace(selectedTrace);
+
+            var fuelConsumed = traces[selectedTrace]["fuel_consumed_since_restart"];
+            var fuelConsumedLiters = _.last(fuelConsumed).value - _.first(fuelConsumed).value;
+            var fuelConsumedGallons = fuelConsumedLiters * .264172;
+            $("#total-fuel-consumed").text(calculateFuelConsumedGallons(selectedTrace).toFixed(2));
         },
         dataType: "text"
     });
+}
+
+function calculateFuelConsumedGallons(traceName) {
+    var fuelConsumed = traces[traceName]["fuel_consumed_since_restart"];
+    var fuelConsumedLiters = _.last(fuelConsumed).value - _.first(fuelConsumed).value;
+    return fuelConsumedLiters * .264172;
 }
 
 $(document).ready(function() {
