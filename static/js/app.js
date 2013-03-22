@@ -7,7 +7,7 @@ var speedValues = [];
 var odoTimestamps = [];
 var odoValues = [];
 
-var graphs = {};;
+var graphs = {};
 
 var traces = {};
 
@@ -100,6 +100,10 @@ function loadTrace(selectedTrace) {
             var speeds = traces[selectedTrace].vehicle_speed;
             graphs.speed = drawSparkline("#speed", 200, 50,
                 _.pluck(speeds, "timestamp"), _.pluck(speeds, "value"));
+
+            var odometer = traces[selectedTrace].odometer;
+            graphs.odometer = drawSparkline("#odometer", 200, 50,
+                _.pluck(odometer, "timestamp"), _.pluck(odometer, "value"));
         },
         dataType: "text"
     });
@@ -113,9 +117,7 @@ $(document).ready(function() {
         maxZoom: 16
     }).addTo(map);
 
-
-    // create a red polyline from an arrays of LatLng points
-    path = L.polyline([], {color: 'red', width: 20}).addTo(map);
+    path = L.polyline([], {color: 'green', width: 20}).addTo(map);
     pathHead = L.circle(startingPosition, 25).addTo(map);
 
     var selectedTrace = $("#traces .active").attr("href");
