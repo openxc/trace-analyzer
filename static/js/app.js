@@ -9,6 +9,8 @@ var odoValues = [];
 
 var graph;
 
+var traces = {};
+
 function drawSparkline(elementId, width, height, dataX, domainX, dataY,
         domainY) {
     // create an SVG element inside the element that fills 100% of the div
@@ -36,29 +38,21 @@ function drawSparkline(elementId, width, height, dataX, domainX, dataY,
     graph.append("svg:path").attr("d", line(dataX));
 }
 
-var position = {latitude: undefined, longitude: undefined};
-
-function handleMessage(message) {
-    if(message.name === "latitude") {
-        position.latitude = message.value;
-    } else if(message.name === "longitude") {
-        position.longitude = message.value;
-    } else if(message.name === "odometer") {
-        odoTimestamps = message.timestamp;
-        odoValues = message.value;
-        graph.selectAll("path").data([data]) // set the new data
-                .attr("d", line); // apply the new data values
-    } else if(message.name === "vehicle_speed") {
-        speedTimestamps = message.timestamp;
-        speedValues = message.value;
+function handleMessage(traceName, message) {
+    if(!message) {
+        return;
     }
 
-    if(position.latitude && position.longitude) {
-        pathHead.setLatLng([position.latitude, position.longitude]);
-        path.addLatLng(pathHead.getLatLng());
-        map.fitBounds(path.getBounds());
-        position.latitude = position.longitude = undefined;
+    if(!_.has(traces, traceName)) {
+        traces[traceName] = {};
     }
+
+    if(!_.has(traces[traceName], message.name)) {
+        traces[traceName][message.name] = [];
+    }
+
+    traces[traceName][message.name].push(
+            {timestamp: message.timestamp, value: message.value});
 }
 
 function updateTraceDownloadProgress(progress) {
@@ -66,7 +60,20 @@ function updateTraceDownloadProgress(progress) {
     $($("#download-progress progress")).text(progress + "%");
 }
 
+function renderGpsTrace(traceName) {
+    var latitudes = traces[traceName].latitude;
+    var longitudes = traces[traceName].longitude;
+
+    for(var i = 0; i < latitudes.length, i < longitudes.length; i++) {
+        path.addLatLng([latitudes[i].value, longitudes[i].value]);
+    }
+
+    pathHead.setLatLng(path.getLatLngs()[path.getLatLngs().length - 1]);
+    map.fitBounds(path.getBounds());
+}
+
 function loadTrace() {
+    var selectedTrace = $("#traces .active").attr("href");
     $.ajax({
         xhr: function() {
             var xhr = new window.XMLHttpRequest();
@@ -78,7 +85,7 @@ function loadTrace() {
             }, false);
             return xhr;
         },
-        url: $("#trace-1").attr("href"),
+        url: selectedTrace,
         success: function(data) {
             $("#download-progress").text("Trace download complete.");
             setTimeout(function() {
@@ -87,9 +94,11 @@ function loadTrace() {
 
             $.each(data.split("\n"), function(i, line) {
                 if(line) {
-                    handleMessage(JSON.parse(line));
+                    handleMessage(selectedTrace, JSON.parse(line));
                 }
             });
+
+            renderGpsTrace(selectedTrace);
         },
         dataType: "text"
     });
