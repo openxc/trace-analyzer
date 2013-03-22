@@ -11,6 +11,8 @@ var graphs = {};
 
 var traces = {};
 
+var mapLayerGroups = {};
+
 function drawSparkline(elementId, dataX, dataY) {
     // create an SVG element inside the element that fills 100% of the div
     var graph = d3.select(elementId).append("svg:svg").attr("width",
@@ -63,15 +65,31 @@ function updateTraceDownloadProgress(progress) {
 // TODO show renering progress if it takes a while
 
 function renderGpsTrace(traceName) {
-    var latitudes = traces[traceName].latitude;
-    var longitudes = traces[traceName].longitude;
+    var activeLayer = undefined;
+    _.each(mapLayerGroups, function(layer, layerName) {
+        if(layerName === traceName) {
+            activeLayer = map.addLayer(layer);
+        } else {
+            map.removeLayer(layer);
+        }
+    });
 
-    for(var i = 0; i < latitudes.length, i < longitudes.length; i++) {
-        path.addLatLng([latitudes[i].value, longitudes[i].value]);
+    if(!_.has(mapLayerGroups, traceName)) {
+        var latitudes = traces[traceName].latitude;
+        var longitudes = traces[traceName].longitude;
+
+        var path = L.polyline([], {color: 'green', width: 20});
+        for(var i = 0; i < latitudes.length, i < longitudes.length; i++) {
+            path.addLatLng([latitudes[i].value, longitudes[i].value]);
+        }
+
+        var start = L.marker(path.getLatLngs()[0]);
+        var end = L.marker(path.getLatLngs()[path.getLatLngs().length - 1]);
+        activeLayer = mapLayerGroups[traceName] = L.featureGroup([path, start, end]);
     }
 
-    pathHead.setLatLng(path.getLatLngs()[path.getLatLngs().length - 1]);
-    map.fitBounds(path.getBounds());
+    map.addLayer(activeLayer);
+    map.fitBounds(activeLayer.getBounds());
 }
 
 function loadTrace(selectedTrace) {
@@ -93,16 +111,16 @@ function loadTrace(selectedTrace) {
                 $("#download-progress").hide();
             }, 8);
 
-            $.each(data.split("\n"), function(i, line) {
+            _.each(data.split("\n"), function(line, i) {
                 if(line) {
                     handleMessage(selectedTrace, JSON.parse(line));
                 }
             });
 
 
-            $.each(["vehicle_speed", "engine_speed", "odometer",
+            _.each(["vehicle_speed", "engine_speed", "odometer",
                     "torque_at_transmission", "accelerator_pedal_position",
-                    "fuel_consumed_since_restart"], function(i, key) {
+                    "fuel_consumed_since_restart"], function(key, i) {
                 var data = traces[selectedTrace][key];
                 graphs[key] = drawSparkline("#" + key,
                     _.pluck(data, "timestamp"), _.pluck(data, "value"));
@@ -115,15 +133,11 @@ function loadTrace(selectedTrace) {
 }
 
 $(document).ready(function() {
-    var startingPosition = new L.LatLng(39.970806, -119.387054);
-    map = L.map('map').setView(startingPosition, 13);
+    map = L.map('map', {zoom: 10});
     L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
         maxZoom: 16
     }).addTo(map);
-
-    path = L.polyline([], {color: 'green', width: 20}).addTo(map);
-    pathHead = L.circle(startingPosition, 25).addTo(map);
 
     var selectedTrace = $("#traces .active").attr("href");
     loadTrace(selectedTrace);
