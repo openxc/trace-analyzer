@@ -49,38 +49,39 @@ function drawTimeseries(elementId, dataX, dataY) {
     hoverLine.classed("hide", true);
 
     $(hoverContainer).mouseleave(function(event) {
-        handleMouseOutGraph(event, hoverLine);
+        handleMouseOutGraph(event);
     });
 
     $(hoverContainer).mousemove(function(event) {
-        handleMouseOverGraph(event, hoverLine, dimensions);
+        handleMouseOverGraph(event, dimensions);
     });
 
     // display the line by appending an svg:path element with the data line we created above
     graph.append("svg:path").attr("d", line(_.zip(dataX, dataY)));
-    return [graph, dimensions];
+    return {graph: graph, hoverLine: hoverLine, dimensions: dimensions};
 }
 
 var handleMouseOutGraph = function(event, hoverLine) {
-    // hide the hover-line
-    hoverLine.classed("hide", true);
+    _.each(_.pluck(graphs, "hoverLine"), function(hoverLine, i) {
+        hoverLine.classed("hide", true);
+    });
     // TODO hide the labels setValueLabelsToLatest();
 }
 
-var handleMouseOverGraph = function(event, hoverLine, dimensions) {
+var handleMouseOverGraph = function(event, dimensions) {
     var mouseX = event.pageX - dimensions.xOffset;
     var mouseY = event.pageY - dimensions.yOffset;
 
     if(mouseX >= 0 && mouseX <= dimensions.width && mouseY >= 0 && mouseY <= dimensions.height) {
-        // show the hover line
-        hoverLine.classed("hide", false);
+        _.each(_.pluck(graphs, "hoverLine"), function(hoverLine, i) {
+            hoverLine.classed("hide", false);
 
-        // set position of hoverLine
-        hoverLine.attr("x1", mouseX).attr("x2", mouseX)
-
-        // displayValueLabelsForPositionX(mouseX)
+            // set position of hoverLine
+            hoverLine.attr("x1", mouseX).attr("x2", mouseX)
+            // TODO displayValueLabelsForPositionX(mouseX)
+        });
     } else {
-        handleMouseOutGraph(event, hoverLine);
+        handleMouseOutGraph(event);
     }
 }
 
