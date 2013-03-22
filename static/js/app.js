@@ -3,17 +3,33 @@ var graphs = {};
 var traces = {};
 var mapLayerGroups = {};
 
-function drawSparkline(elementId, dataX, dataY) {
+var initDimensions = function(elementId) {
+    // automatically size to the container using JQuery to get width/height
+    width = $(elementId).width();
+    height = $(elementId).height();
+
+    // make sure to use offset() and not position() as we want it relative to
+    // the document, not its parent
+    xOffset = $(elementId).offset().left;
+    yOffset = $(elementId).offset().top;
+    return {width: width, height: height, xOffset: xOffset, yOffset: yOffset};
+}
+
+
+function drawTimeseries(elementId, dataX, dataY) {
     // create an SVG element inside the element that fills 100% of the div
-    var graph = d3.select(elementId).append("svg:svg").attr("width",
-        "100%").attr("height", "100%");
+    var graph = d3.select(elementId).append("svg:svg").attr("width", "100%")
+            .attr("height", "100%");
+            hoverContainer = $(elementId + " svg");
+
+    var dimensions = initDimensions(elementId);
 
     // X scale will fit values from 0-10 within range of pixels
     var x = d3.scale.linear().domain([_.min(dataX), _.max(dataX)]).range(
-            [0, $(elementId).width()]);
+            [0, dimensions.width]);
     // Y scale will fit values from 0-10 within pixels 0-100
     var y = d3.scale.linear().domain([_.min(dataY), _.max(dataY)]).range(
-            [$(elementId).height(), 0]);
+            [dimensions.height, 0]);
 
     // create a line object that represents the SVN line we're creating
     var line = d3.svg.line()
@@ -26,9 +42,46 @@ function drawSparkline(elementId, dataX, dataY) {
         return y(d[1]);
     })
 
+    var hoverLineGroup = graph.append("svg:svg").attr("class", "hover-line");
+    var hoverLine = hoverLineGroup.append("svg:line")
+        .attr("x1", 10).attr("x2", 10)
+        .attr("y1", 0).attr("y2", dimensions.height);
+    hoverLine.classed("hide", true);
+
+    $(hoverContainer).mouseleave(function(event) {
+        handleMouseOutGraph(event, hoverLine);
+    });
+
+    $(hoverContainer).mousemove(function(event) {
+        handleMouseOverGraph(event, hoverLine, dimensions);
+    });
+
     // display the line by appending an svg:path element with the data line we created above
     graph.append("svg:path").attr("d", line(_.zip(dataX, dataY)));
-    return graph;
+    return [graph, dimensions];
+}
+
+var handleMouseOutGraph = function(event, hoverLine) {
+    // hide the hover-line
+    hoverLine.classed("hide", true);
+    // TODO hide the labels setValueLabelsToLatest();
+}
+
+var handleMouseOverGraph = function(event, hoverLine, dimensions) {
+    var mouseX = event.pageX - dimensions.xOffset;
+    var mouseY = event.pageY - dimensions.yOffset;
+
+    if(mouseX >= 0 && mouseX <= dimensions.width && mouseY >= 0 && mouseY <= dimensions.height) {
+        // show the hover line
+        hoverLine.classed("hide", false);
+
+        // set position of hoverLine
+        hoverLine.attr("x1", mouseX).attr("x2", mouseX)
+
+        // displayValueLabelsForPositionX(mouseX)
+    } else {
+        handleMouseOutGraph(event, hoverLine);
+    }
 }
 
 function handleMessage(traceName, message) {
@@ -140,7 +193,7 @@ function loadTrace(selectedTrace) {
                     "torque_at_transmission", "accelerator_pedal_position",
                     "fuel_consumed_since_restart"], function(key, i) {
                 var data = traces[selectedTrace][key];
-                graphs[key] = drawSparkline("#" + key,
+                graphs[key] = drawTimeseries("#" + key,
                     _.pluck(data, "timestamp"), _.pluck(data, "value"));
             });
 
