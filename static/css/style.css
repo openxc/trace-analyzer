@@ -39,6 +39,10 @@
     stroke: #6E7B8B;
 }
 
+.graph .max-line {
+    stroke: red;
+}
+
 .current-data {
     display: none;
 }

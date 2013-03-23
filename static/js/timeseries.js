@@ -42,6 +42,16 @@ var drawTimeseries = function(trace, elementId, dataX, dataY) {
         .attr("y1", 0).attr("y2", dimensions.height);
     hoverLine.classed("hide", true);
 
+    var maxDataPoint = _.max(_.zip(dataX, dataY), function(point) {
+        return point[1];
+    });
+    var maxPosition = x(maxDataPoint[0]);
+    var maxLineGroup = graph.append("svg:svg").attr("class", "max-line");
+    var maxLine = maxLineGroup.append("svg:line")
+        .attr("x1", maxPosition).attr("x2", maxPosition)
+        .attr("y1", 0).attr("y2", dimensions.height);
+
+
     // display the line by appending an svg:path element with the data line we created above
     graph.append("svg:path").attr("d", line(_.zip(dataX, dataY)));
 
