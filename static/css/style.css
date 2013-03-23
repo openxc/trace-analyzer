@@ -47,6 +47,11 @@
     stroke: green;
 }
 
+.graph text.annotation {
+    font-size: 10px;
+    font-weight: normal;
+}
+
 .current-data {
     display: none;
 }

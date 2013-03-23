@@ -46,7 +46,8 @@ var drawTimeseries = function(trace, elementId, dataX, dataY) {
         return point[1];
     });
     var maxPosition = x(maxDataPoint[0]);
-    var maxLineGroup = graph.append("svg:svg").attr("class", "max-line");
+    var maxLineGroup = graph.append("svg:svg").attr("class", "max-line")
+        .attr("opacity", ".5");
     var maxLine = maxLineGroup.append("svg:line")
         .attr("x1", maxPosition).attr("x2", maxPosition)
         .attr("y1", 0).attr("y2", dimensions.height);
@@ -54,13 +55,16 @@ var drawTimeseries = function(trace, elementId, dataX, dataY) {
 
     var average = _.reduce(dataY, function(memo, value) { return memo + value; },
             0) / dataY.length;
-    var averageLineGroup = graph.append("svg:svg").attr("class", "average-line");
+    var averageLineGroup = graph.append("svg:svg")
+        .attr("class", "average-line")
+        .attr("opacity", ".5");
     var averageLine = averageLineGroup.append("svg:line")
         .attr("x1", 0).attr("x2", dimensions.width)
         .attr("y1", y(average)).attr("y2", y(average));
     var averageText = averageLineGroup.append("svg:text")
         .attr("x", 5).attr("y", y(average) - 8)
         .attr("text-anchor", "left")
+        .attr("class", "annotation")
         .text("avg");
 
     // display the line by appending an svg:path element with the data line we created above
