@@ -5,6 +5,8 @@ var mapLayerGroups = {};
 var activeMapLayer = undefined;
 var hoverMapMarker;
 
+var onTraceLoadCallbacks = [];
+
 var initDimensions = function(elementId) {
     // automatically size to the container using JQuery to get width/height
     width = $("#" + elementId).width();
@@ -18,7 +20,7 @@ var initDimensions = function(elementId) {
 }
 
 
-function drawTimeseries(traceName, elementId, dataX, dataY) {
+function drawTimeseries(trace, elementId, dataX, dataY) {
     // create an SVG element inside the element that fills 100% of the div
     var graph = d3.select("#" + elementId).append("svg:svg").attr("width", "100%")
             .attr("height", "100%");
@@ -62,7 +64,7 @@ function drawTimeseries(traceName, elementId, dataX, dataY) {
     });
 
     $(hoverContainer).mousemove(function(event) {
-        handleMouseOverGraph(event, traceName, graphHolder);
+        handleMouseOverGraph(event, trace, graphHolder);
     });
 
     return graphHolder;
@@ -85,7 +87,7 @@ var findClosestToX = function(targetX, dataX, dataY) {
     });
 }
 
-var handleMouseOverGraph = function(event, traceName, graph) {
+var handleMouseOverGraph = function(event, trace, graph) {
     var mouseX = event.pageX - graph.dimensions.xOffset;
     var mouseY = event.pageY - graph.dimensions.yOffset;
 
@@ -105,8 +107,8 @@ var handleMouseOverGraph = function(event, traceName, graph) {
         });
 
         // TODO find closest timestamp in trace
-        var latitudes = traces[traceName].latitude;
-        var longitudes = traces[traceName].longitude;
+        var latitudes = trace.latitude;
+        var longitudes = trace.longitude;
         var closestPosition = findClosestToX(hoveredTimestamp,
             _.pluck(latitudes, "timestamp"), _.zip(latitudes, longitudes))[1];
 
@@ -120,20 +122,20 @@ var handleMouseOverGraph = function(event, traceName, graph) {
     }
 }
 
-function handleMessage(traceName, message) {
+function handleMessage(traceUrl, message) {
     if(!message) {
         return;
     }
 
-    if(!_.has(traces, traceName)) {
-        traces[traceName] = {};
+    if(!_.has(traces, traceUrl)) {
+        traces[traceUrl] = {url: traceUrl};
     }
 
-    if(!_.has(traces[traceName], message.name)) {
-        traces[traceName][message.name] = [];
+    if(!_.has(traces[traceUrl], message.name)) {
+        traces[traceUrl][message.name] = [];
     }
 
-    traces[traceName][message.name].push(
+    traces[traceUrl][message.name].push(
             {timestamp: message.timestamp, value: message.value});
 }
 
@@ -143,18 +145,18 @@ function updateTraceDownloadProgress(progress) {
 }
 // TODO show renering progress if it takes a while
 
-function renderGpsTrace(traceName) {
+function renderGpsTrace(trace) {
     _.each(mapLayerGroups, function(layer, layerName) {
-        if(layerName === traceName) {
+        if(layerName === trace.url) {
             activeMapLayer = map.addLayer(layer);
         } else {
             map.removeLayer(layer);
         }
     });
 
-    if(!_.has(mapLayerGroups, traceName)) {
-        var latitudes = traces[traceName].latitude;
-        var longitudes = traces[traceName].longitude;
+    if(!_.has(mapLayerGroups, trace.url)) {
+        var latitudes = trace.latitude;
+        var longitudes = trace.longitude;
 
         var path = L.polyline([], {color: 'green', width: 20});
         for(var i = 0; i < latitudes.length, i < longitudes.length; i++) {
@@ -165,15 +167,15 @@ function renderGpsTrace(traceName) {
                 {color: "blue"});
         var end = new L.CircleMarker(_.last(path.getLatLngs()),
                 {color: "green"});
-        activeMapLayer = mapLayerGroups[traceName] = L.featureGroup([path, start, end]);
+        activeMapLayer = mapLayerGroups[trace.url] = L.featureGroup([path, start, end]);
     }
 
     map.addLayer(activeMapLayer);
     map.fitBounds(activeMapLayer.getBounds());
-    updateGasPrices(traceName, map.getCenter());
+    updateGasPrices(trace, map.getCenter());
 }
 
-function updateGasPrices(traceName, position) {
+function updateGasPrices(trace, position) {
     var gasDistance = 5;
     var apiKey = "rfej9napna";
     $.ajax({
@@ -194,11 +196,28 @@ function updateGasPrices(traceName, position) {
                         }, 0) / stationsWithPrice.length;
 
                 $("#total-fuel-cost").text((averagePrice *
-                        calculateFuelConsumedGallons(traceName)).toFixed(2));
+                        calculateFuelConsumedGallons(trace)).toFixed(2));
                 $("#average-fuel-cost").text(averagePrice.toFixed(2));
             }
         }
     });
+}
+
+var drawTimeseriesGraphs = function(selectedTrace) {
+    _.each(["vehicle_speed", "engine_speed", "odometer",
+            "torque_at_transmission", "accelerator_pedal_position",
+            "fuel_consumed_since_restart"], function(key, i) {
+        var data = traces[selectedTrace][key];
+        graphs[key] = drawTimeseries(selectedTrace, key,
+            _.pluck(data, "timestamp"), _.pluck(data, "value"));
+    });
+}
+
+var updateFuelCost = function(selectedTrace) {
+    var fuelConsumed = traces[selectedTrace]["fuel_consumed_since_restart"];
+    var fuelConsumedLiters = _.last(fuelConsumed).value - _.first(fuelConsumed).value;
+    var fuelConsumedGallons = fuelConsumedLiters * .264172;
+    $("#total-fuel-consumed").text(calculateFuelConsumedGallons(selectedTrace).toFixed(2));
 }
 
 function loadTrace(selectedTrace) {
@@ -226,27 +245,16 @@ function loadTrace(selectedTrace) {
                 }
             });
 
-            _.each(["vehicle_speed", "engine_speed", "odometer",
-                    "torque_at_transmission", "accelerator_pedal_position",
-                    "fuel_consumed_since_restart"], function(key, i) {
-                var data = traces[selectedTrace][key];
-                graphs[key] = drawTimeseries(selectedTrace, key,
-                    _.pluck(data, "timestamp"), _.pluck(data, "value"));
+            _.each(onTraceLoadCallbacks, function(callback) {
+                callback(selectedTrace);
             });
-
-            renderGpsTrace(selectedTrace);
-
-            var fuelConsumed = traces[selectedTrace]["fuel_consumed_since_restart"];
-            var fuelConsumedLiters = _.last(fuelConsumed).value - _.first(fuelConsumed).value;
-            var fuelConsumedGallons = fuelConsumedLiters * .264172;
-            $("#total-fuel-consumed").text(calculateFuelConsumedGallons(selectedTrace).toFixed(2));
         },
         dataType: "text"
     });
 }
 
-function calculateFuelConsumedGallons(traceName) {
-    var fuelConsumed = traces[traceName]["fuel_consumed_since_restart"];
+function calculateFuelConsumedGallons(trace) {
+    var fuelConsumed = trace["fuel_consumed_since_restart"];
     var fuelConsumedLiters = _.last(fuelConsumed).value - _.first(fuelConsumed).value;
     return fuelConsumedLiters * .264172;
 }
@@ -258,6 +266,8 @@ $(document).ready(function() {
         maxZoom: 16
     }).addTo(map);
 
-    var selectedTrace = $("#traces .active").attr("href");
-    loadTrace(selectedTrace);
+    onTraceLoadCallbacks.push(drawTimeseriesGraphs);
+    onTraceLoadCallbacks.push(renderGpsTrace);
+    onTraceLoadCallbacks.push(updateFuelCost);
+    loadTrace($("#traces .active").attr("href"));
 });
