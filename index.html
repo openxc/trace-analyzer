@@ -10,10 +10,12 @@
 
     <script src="//cdn.leafletjs.com/leaflet-0.5.1/leaflet.js"></script>
     <script src="//code.jquery.com/jquery-1.9.1.min.js"></script>
-    <script src="/static/js/bootstrap.min.js"></script>
+    <script src="/static/js/vendor/bootstrap.min.js"></script>
     <script src="http://d3js.org/d3.v3.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore-min.js"></script>
-    <script src="/static/js/Chart.min.js"></script>
+    <script src="/static/js/vendor/Chart.min.js"></script>
+    <script src="/static/js/vendor/box.js"></script>
+    <script src="/static/js/speedbox.js"></script>
     <script src="/static/js/traces.js"></script>
     <script src="/static/js/timeseries.js"></script>
     <script src="/static/js/map.js"></script>
@@ -46,6 +48,14 @@
                     ligula porttitor justo, nec aliquam tellus nisi consequat arcu. Morbi feugiat
                     consequat urna, ut facilisis lacus lobortis quis. Curabitur ac risus id odio
                     imperdiet faucibus.</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="span7 graph-container box">
+                <div id="speed-box" class="graph"></div>
+            </div>
+            <div class="span4 graph-comments">
             </div>
         </div>
 

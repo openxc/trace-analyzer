@@ -42,6 +42,7 @@ $(document).ready(function() {
     onTraceLoadCallbacks.push(renderGpsTrace);
     onTraceLoadCallbacks.push(updateFuelCost);
     onTraceLoadCallbacks.push(drawGearHistogram);
+    onTraceLoadCallbacks.push(drawSpeedBoxplot);
 
     hoverHandlers.push(timeseriesHoverHandler);
     hoverHandlers.push(mapHoverHandler);
