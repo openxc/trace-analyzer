@@ -38,3 +38,7 @@
 .graph .hover-line {
     stroke: #6E7B8B;
 }
+
+.current-data {
+    display: none;
+}
