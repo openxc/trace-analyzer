@@ -203,21 +203,21 @@ function updateGasPrices(trace, position) {
     });
 }
 
-var drawTimeseriesGraphs = function(selectedTrace) {
+var drawTimeseriesGraphs = function(trace) {
     _.each(["vehicle_speed", "engine_speed", "odometer",
             "torque_at_transmission", "accelerator_pedal_position",
             "fuel_consumed_since_restart"], function(key, i) {
-        var data = traces[selectedTrace][key];
-        graphs[key] = drawTimeseries(selectedTrace, key,
-            _.pluck(data, "timestamp"), _.pluck(data, "value"));
+        var data = trace[key];
+        graphs[key] = drawTimeseries(trace, key, _.pluck(data, "timestamp"),
+                _.pluck(data, "value"));
     });
 }
 
-var updateFuelCost = function(selectedTrace) {
-    var fuelConsumed = traces[selectedTrace]["fuel_consumed_since_restart"];
+var updateFuelCost = function(trace) {
+    var fuelConsumed = trace["fuel_consumed_since_restart"];
     var fuelConsumedLiters = _.last(fuelConsumed).value - _.first(fuelConsumed).value;
     var fuelConsumedGallons = fuelConsumedLiters * .264172;
-    $("#total-fuel-consumed").text(calculateFuelConsumedGallons(selectedTrace).toFixed(2));
+    $("#total-fuel-consumed").text(calculateFuelConsumedGallons(trace).toFixed(2));
 }
 
 function loadTrace(selectedTrace) {
@@ -246,7 +246,7 @@ function loadTrace(selectedTrace) {
             });
 
             _.each(onTraceLoadCallbacks, function(callback) {
-                callback(selectedTrace);
+                callback(traces[selectedTrace]);
             });
         },
         dataType: "text"
@@ -269,5 +269,6 @@ $(document).ready(function() {
     onTraceLoadCallbacks.push(drawTimeseriesGraphs);
     onTraceLoadCallbacks.push(renderGpsTrace);
     onTraceLoadCallbacks.push(updateFuelCost);
+    onTraceLoadCallbacks.push(drawGearHistogram);
     loadTrace($("#traces .active").attr("href"));
 });

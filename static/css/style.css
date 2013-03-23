@@ -15,6 +15,10 @@
     border-bottom: 1px solid lightgrey;
 }
 
+.graph-container.histogram {
+    height: 150px;
+}
+
 .graph path {
     stroke: steelblue;
     stroke-width: 1;
