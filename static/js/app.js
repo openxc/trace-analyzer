@@ -52,6 +52,7 @@ $(document).ready(function() {
 
     hoverHandlers.push(timeseriesHoverHandler);
     hoverHandlers.push(mapHoverHandler);
+    hoverHandlers.push(gearHistogramHoverHandler);
 
     loadTrace($("#traces .active").attr("href"));
 });
