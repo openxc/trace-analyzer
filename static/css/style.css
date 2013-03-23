@@ -43,6 +43,10 @@
     stroke: red;
 }
 
+.graph .average-line {
+    stroke: green;
+}
+
 .current-data {
     display: none;
 }

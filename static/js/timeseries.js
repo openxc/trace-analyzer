@@ -16,7 +16,7 @@ var drawTimeseries = function(trace, elementId, dataX, dataY) {
     // create an SVG element inside the element that fills 100% of the div
     var graph = d3.select("#" + elementId).append("svg:svg").attr("width", "100%")
             .attr("height", "100%");
-            hoverContainer = $("#" + elementId + " svg");
+    hoverContainer = $("#" + elementId + " svg");
 
     var dimensions = initDimensions(elementId);
 
@@ -48,6 +48,17 @@ var drawTimeseries = function(trace, elementId, dataX, dataY) {
     var maxLine = maxLineGroup.append("svg:line")
         .attr("x1", 0).attr("x2", dimensions.width)
         .attr("y1", maxPosition).attr("y2", maxPosition);
+
+    var average = _.reduce(dataY, function(memo, value) { return memo + value; },
+            0) / dataY.length;
+    var averageLineGroup = graph.append("svg:svg").attr("class", "average-line");
+    var averageLine = averageLineGroup.append("svg:line")
+        .attr("x1", 0).attr("x2", dimensions.width)
+        .attr("y1", y(average)).attr("y2", y(average));
+    var averageText = averageLineGroup.append("svg:text")
+        .attr("x", 5).attr("y", y(average) - 8)
+        .attr("text-anchor", "left")
+        .text("avg");
 
     // display the line by appending an svg:path element with the data line we created above
     graph.append("svg:path").attr("d", line(_.zip(dataX, dataY)));

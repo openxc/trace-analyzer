@@ -17,7 +17,7 @@ var updateGasPrices = function(trace) {
                 var averagePrice = _.reduce(stationsWithPrice,
                         function(memo, station) {
                             return memo + parseInt(station.price);
-                        }, 0) / stationsWithPrice.length;
+                }, 0) / stationsWithPrice.length;
 
                 $("#total-fuel-cost").text((averagePrice *
                         calculateFuelConsumedGallons(trace)).toFixed(2));
