@@ -42,12 +42,15 @@ var drawTimeseries = function(trace, elementId, dataX, dataY) {
         .attr("y1", 0).attr("y2", dimensions.height);
     hoverLine.classed("hide", true);
 
-    var maxValue = _.max(dataY);
-    var maxPosition = y(maxValue);
+    var maxDataPoint = _.max(_.zip(dataX, dataY), function(point) {
+        return point[1];
+    });
+    var maxPosition = x(maxDataPoint[0]);
     var maxLineGroup = graph.append("svg:svg").attr("class", "max-line");
     var maxLine = maxLineGroup.append("svg:line")
-        .attr("x1", 0).attr("x2", dimensions.width)
-        .attr("y1", maxPosition).attr("y2", maxPosition);
+        .attr("x1", maxPosition).attr("x2", maxPosition)
+        .attr("y1", 0).attr("y2", dimensions.height);
+
 
     var average = _.reduce(dataY, function(memo, value) { return memo + value; },
             0) / dataY.length;
