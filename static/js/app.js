@@ -1,10 +1,3 @@
-var map;
-var graphs = {};
-var traces = {};
-var mapLayerGroups = {};
-var activeMapLayer = undefined;
-var hoverMapMarker;
-
 var onTraceLoadCallbacks = [];
 var hoverHandlers = []
 

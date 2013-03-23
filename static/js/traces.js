@@ -1,3 +1,5 @@
+var traces = {};
+
 function loadTrace(selectedTrace) {
     $.ajax({
         xhr: function() {

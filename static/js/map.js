@@ -1,3 +1,8 @@
+var map;
+var mapLayerGroups = {};
+var activeMapLayer = undefined;
+var hoverMapMarker;
+
 var mapHoverHandler = {
     on: function(timestamp, trace) {
         var latitudes = trace.latitude;

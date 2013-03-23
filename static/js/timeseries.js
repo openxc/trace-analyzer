@@ -1,3 +1,5 @@
+var graphs = {};
+
 var initDimensions = function(elementId) {
     // automatically size to the container using JQuery to get width/height
     width = $("#" + elementId).width();
