@@ -51,7 +51,6 @@ function handleMessage(traceUrl, message) {
         traces[traceUrl][message.name] = [];
     }
 
-    traces[traceUrl][message.name].push(
-            {timestamp: message.timestamp, value: message.value});
+    traces[traceUrl][message.name].push(message);
 }
 
