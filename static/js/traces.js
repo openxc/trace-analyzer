@@ -62,7 +62,7 @@ var handleMessage = function(traceUrl, message) {
     dynamics[message.name] = message.value;
 
     var records = traces[traceUrl].records;
-    var dynamicsCopy = $.extend(true, {}, dynamics);
+    var dynamicsCopy = $.extend({}, dynamics);
     if(records.length > 0 && dynamics.timestamp - _.last(records).timestamp  < 1) {
         dynamicsCopy.timestamp = _.last(records).timestamp;
         traces[traceUrl].records[records.length - 1] = dynamicsCopy;
