@@ -29,12 +29,15 @@ var drawTimeseries = function(trace, elementId, dataX, dataY) {
 
     // create a line object that represents the SVG line we're creating
     var line = d3.svg.line()
-    .x(function(d,i) {
-        return x(d[0]);
-    })
-    .y(function(d) {
-        return y(d[1]);
-    })
+        .x(function(d,i) {
+            return x(d[0]);
+        })
+        .y(function(d) {
+            return y(d[1]);
+        })
+        .defined(function(d) {
+            return !isNaN(d[1]);
+        });
 
     var hoverLineGroup = graph.append("svg:svg").attr("class", "hover-line");
     var hoverLine = hoverLineGroup.append("svg:line")
@@ -53,8 +56,9 @@ var drawTimeseries = function(trace, elementId, dataX, dataY) {
         .attr("y1", 0).attr("y2", dimensions.height);
 
 
-    var average = _.reduce(dataY, function(memo, value) { return memo + value; },
-            0) / dataY.length;
+    var average = _.reduce(dataY, function(memo, value) {
+            return memo + (value || 0);
+        }, 0) / dataY.length;
     var averageLineGroup = graph.append("svg:svg")
         .attr("class", "average-line")
         .attr("opacity", ".5");
@@ -110,9 +114,8 @@ var drawTimeseriesGraphs = function(trace) {
     _.each(["vehicle_speed", "engine_speed", "odometer",
             "torque_at_transmission", "accelerator_pedal_position",
             "fuel_consumed_since_restart"], function(key, i) {
-        var data = trace[key];
-        graphs[key] = drawTimeseries(trace, key, _.pluck(data, "timestamp"),
-                _.pluck(data, "value"));
+        graphs[key] = drawTimeseries(trace, key,
+            _.pluck(trace.records, "timestamp"), _.pluck(trace.records, key));
     });
 }
 

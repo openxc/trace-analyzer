@@ -1,11 +1,13 @@
 var updateGasPrices = function(trace) {
     var gasDistance = 5;
     var apiKey = "rfej9napna";
-    var position = [trace.latitude[0].value, trace.longitude[0].value];
+    var recordWithPosition = _.find(trace.records, function(record) {
+        return record.latitude && record.longitude;
+    });
     $.ajax({
         url: "http://devapi.mygasfeed.com/stations/radius/" +
-            position[0] + "/" + position[1] + "/" + gasDistance +
-            "/reg/price/" + apiKey + ".json",
+            recordWithPosition.latitude + "/" + recordWithPosition.longitude +
+            "/" + gasDistance + "/reg/price/" + apiKey + ".json",
         dataType: "jsonp",
         success: function(data) {
             var stations = data["stations"];
@@ -28,8 +30,8 @@ var updateGasPrices = function(trace) {
 }
 
 var calculateFuelConsumedGallons = function(trace) {
-    var fuelConsumed = trace["fuel_consumed_since_restart"];
-    var fuelConsumedLiters = _.last(fuelConsumed).value - _.first(fuelConsumed).value;
+    var fuelConsumedLiters = _.last(trace.records).fuel_consumed_since_restart -
+            _.first(trace.records).fuel_consumed_since_restart;
     return fuelConsumedLiters * .264172;
 }
 

@@ -38,19 +38,24 @@ function updateTraceDownloadProgress(progress) {
     $($("#download-progress progress")).text(progress + "%");
 }
 
+var dynamics = {
+}
+
 function handleMessage(traceUrl, message) {
     if(!message) {
         return;
     }
 
     if(!_.has(traces, traceUrl)) {
-        traces[traceUrl] = {url: traceUrl};
+        traces[traceUrl] = {url: traceUrl, records: []};
     }
 
-    if(!_.has(traces[traceUrl], message.name)) {
-        traces[traceUrl][message.name] = [];
-    }
+    // TODO this assumes we never get the exact same timestamp 2 messages in a
+    // row, which I think is a safe assumption because the precision of the
+    // timestamps is very high right now
+    dynamics.timestamp = message.timestamp;
+    dynamics[message.name] = message.value;
 
-    traces[traceUrl][message.name].push(message);
+    traces[traceUrl].records.push($.extend(true, {}, dynamics));
 }
 
