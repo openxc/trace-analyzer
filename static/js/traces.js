@@ -1,23 +1,40 @@
 var traces = {};
 var dynamics = {};
 
-var finishTraceDownload = function() {
-    $("#download-progress").text("Trace download complete.");
+var finishProgress = function(type) {
+    $("#" + type + "-progress").text("Trace " + type + " complete.");
     setTimeout(function() {
-        $("#download-progress").hide();
+        $("#" + type + "-progress").hide();
     }, 8);
 }
 
+var updateProgress = function(element, progress) {
+    $(element).show();
+    $(element).attr("value", progress);
+    $(element).text(progress + "%");
+}
+
 var processTrace = function(selectedTrace, data) {
+    var count = 0;
+    var lastLoggedProgress = 0;
+    var progressElement = $("#analysis-progress progress");
     _.each(data.split("\n"), function(line, i) {
         if(line) {
             handleMessage(selectedTrace, JSON.parse(line));
+            count += line.length;
+            var progress = count / data.length * 100;
+            if(progress >= lastLoggedProgress + 1) {
+                updateProgress(progressElement, progress);
+                lastLoggedProgress = progress;
+            }
         }
     });
 
     _.each(onTraceLoadCallbacks, function(callback) {
         callback(traces[selectedTrace]);
     });
+
+    finishProgress("analysis");
 }
 
 var loadTrace = function(selectedTrace) {
@@ -27,23 +44,18 @@ var loadTrace = function(selectedTrace) {
             xhr.addEventListener("progress", function(evt){
                 if(evt.lengthComputable) {
                     var percentComplete = evt.loaded / evt.total;
-                    updateTraceDownloadProgress(percentComplete * 100);
+                    updateProgress($("#download-progress progress"), percentComplete * 100);
                 }
             }, false);
             return xhr;
         },
         url: selectedTrace,
         success: function(data) {
-            finishTraceDownload();
+            finishProgress("download");
             processTrace(selectedTrace, data);
         },
         dataType: "text"
     });
-}
-
-var updateTraceDownloadProgress = function(progress) {
-    $($("#download-progress progress")).attr("value", progress);
-    $($("#download-progress progress")).text(progress + "%");
 }
 
 var handleMessage = function(traceUrl, message) {

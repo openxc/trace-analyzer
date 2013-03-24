@@ -35,6 +35,11 @@
     font-weight: bold
 }
 
+#analysis-progress {
+    font-weight: bold;
+    display: none;
+}
+
 .graph .hover-line {
     stroke: #6E7B8B;
 }
