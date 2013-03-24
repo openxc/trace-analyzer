@@ -116,6 +116,7 @@ var drawTimeseriesGraphs = function(trace) {
             "fuel_consumed_since_restart"], function(key, i) {
         graphs[key] = drawTimeseries(trace, key,
             _.pluck(trace.records, "timestamp"), _.pluck(trace.records, key));
+        return;
     });
 }
 
