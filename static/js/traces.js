@@ -1,6 +1,26 @@
 var traces = {};
+var dynamics = {};
 
-function loadTrace(selectedTrace) {
+var finishTraceDownload = function() {
+    $("#download-progress").text("Trace download complete.");
+    setTimeout(function() {
+        $("#download-progress").hide();
+    }, 8);
+}
+
+var processTrace = function(selectedTrace, data) {
+    _.each(data.split("\n"), function(line, i) {
+        if(line) {
+            handleMessage(selectedTrace, JSON.parse(line));
+        }
+    });
+
+    _.each(onTraceLoadCallbacks, function(callback) {
+        callback(traces[selectedTrace]);
+    });
+}
+
+var loadTrace = function(selectedTrace) {
     $.ajax({
         xhr: function() {
             var xhr = new window.XMLHttpRequest();
@@ -14,34 +34,19 @@ function loadTrace(selectedTrace) {
         },
         url: selectedTrace,
         success: function(data) {
-            $("#download-progress").text("Trace download complete.");
-            setTimeout(function() {
-                $("#download-progress").hide();
-            }, 8);
-
-            _.each(data.split("\n"), function(line, i) {
-                if(line) {
-                    handleMessage(selectedTrace, JSON.parse(line));
-                }
-            });
-
-            _.each(onTraceLoadCallbacks, function(callback) {
-                callback(traces[selectedTrace]);
-            });
+            finishTraceDownload();
+            processTrace(selectedTrace, data);
         },
         dataType: "text"
     });
 }
 
-function updateTraceDownloadProgress(progress) {
+var updateTraceDownloadProgress = function(progress) {
     $($("#download-progress progress")).attr("value", progress);
     $($("#download-progress progress")).text(progress + "%");
 }
 
-var dynamics = {
-}
-
-function handleMessage(traceUrl, message) {
+var handleMessage = function(traceUrl, message) {
     if(!message) {
         return;
     }
@@ -65,4 +70,3 @@ function handleMessage(traceUrl, message) {
         traces[traceUrl].records.push(dynamicsCopy);
     }
 }
-
