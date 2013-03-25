@@ -15,7 +15,7 @@
     border-bottom: 1px solid lightgrey;
 }
 
-.graph-container.histogram {
+.graph-container.histogram, .graph-container.histogram canvas {
     height: 150px;
 }
 
