@@ -12,7 +12,8 @@ var initDimensions = function(elementId) {
     return {width: width, height: height, xOffset: xOffset, yOffset: yOffset};
 }
 
-var drawTimeseries = function(trace, elementId, dataX, dataY) {
+var drawTimeseries = function(trace, elementId, dataX, dataY, showAverage,
+        showMax) {
     // create an SVG element inside the element that fills 100% of the div
     var graph = d3.select("#" + elementId).append("svg:svg").attr("width", "100%")
             .attr("height", "100%");
@@ -45,31 +46,34 @@ var drawTimeseries = function(trace, elementId, dataX, dataY) {
         .attr("y1", 0).attr("y2", dimensions.height);
     hoverLine.classed("hide", true);
 
-    var maxDataPoint = _.max(_.zip(dataX, dataY), function(point) {
-        return point[1];
-    });
-    var maxPosition = x(maxDataPoint[0]);
-    var maxLineGroup = graph.append("svg:svg").attr("class", "max-line")
-        .attr("opacity", ".5");
-    var maxLine = maxLineGroup.append("svg:line")
-        .attr("x1", maxPosition).attr("x2", maxPosition)
-        .attr("y1", 0).attr("y2", dimensions.height);
+    if(showMax) {
+        var maxDataPoint = _.max(_.zip(dataX, dataY), function(point) {
+            return point[1];
+        });
+        var maxPosition = x(maxDataPoint[0]);
+        var maxLineGroup = graph.append("svg:svg").attr("class", "max-line")
+            .attr("opacity", ".5");
+        var maxLine = maxLineGroup.append("svg:line")
+            .attr("x1", maxPosition).attr("x2", maxPosition)
+            .attr("y1", 0).attr("y2", dimensions.height);
+    }
 
-
-    var average = _.reduce(dataY, function(memo, value) {
-            return memo + (value || 0);
-        }, 0) / dataY.length;
-    var averageLineGroup = graph.append("svg:svg")
-        .attr("class", "average-line")
-        .attr("opacity", ".5");
-    var averageLine = averageLineGroup.append("svg:line")
-        .attr("x1", 0).attr("x2", dimensions.width)
-        .attr("y1", y(average)).attr("y2", y(average));
-    var averageText = averageLineGroup.append("svg:text")
-        .attr("x", 5).attr("y", y(average) - 8)
-        .attr("text-anchor", "left")
-        .attr("class", "annotation")
-        .text("avg");
+    if(showAverage) {
+        var average = _.reduce(dataY, function(memo, value) {
+                return memo + (value || 0);
+            }, 0) / dataY.length;
+        var averageLineGroup = graph.append("svg:svg")
+            .attr("class", "average-line")
+            .attr("opacity", ".5");
+        var averageLine = averageLineGroup.append("svg:line")
+            .attr("x1", 0).attr("x2", dimensions.width)
+            .attr("y1", y(average)).attr("y2", y(average));
+        var averageText = averageLineGroup.append("svg:text")
+            .attr("x", 5).attr("y", y(average) - 8)
+            .attr("text-anchor", "left")
+            .attr("class", "annotation")
+            .text("avg " + average.toFixed(2));
+    }
 
     // display the line by appending an svg:path element with the data line we created above
     graph.append("svg:path").attr("d", line(_.zip(dataX, dataY)));
@@ -111,11 +115,19 @@ var timeseriesHoverHandler = {
 }
 
 var drawTimeseriesGraphs = function(trace) {
-    _.each(["vehicle_speed", "engine_speed", "odometer",
-            "torque_at_transmission", "accelerator_pedal_position",
-            "fuel_consumed_since_restart"], function(key, i) {
+    _.each(["vehicle_speed", "engine_speed", "torque_at_transmission"],
+            function(key, i) {
         graphs[key] = drawTimeseries(trace, key,
-            _.pluck(trace.records, "timestamp"), _.pluck(trace.records, key));
+            _.pluck(trace.records, "timestamp"), _.pluck(trace.records, key),
+            true, true);
+        return;
+    });
+
+    _.each(["odometer", "fuel_consumed_since_restart",
+            "accelerator_pedal_position"], function(key, i) {
+        graphs[key] = drawTimeseries(trace, key,
+            _.pluck(trace.records, "timestamp"), _.pluck(trace.records, key),
+            false. false);
         return;
     });
 }
