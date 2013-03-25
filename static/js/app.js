@@ -40,7 +40,7 @@ $(document).ready(function() {
 
     onTraceLoadCallbacks.push(drawTimeseriesGraphs);
     onTraceLoadCallbacks.push(renderGpsTrace);
-    onTraceLoadCallbacks.push(updateFuelCost);
+    onTraceLoadCallbacks.push(updateFuelSummary);
     onTraceLoadCallbacks.push(drawGearHistogram);
 
     hoverHandlers.push(timeseriesHoverHandler);

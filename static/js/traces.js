@@ -86,3 +86,31 @@ var handleMessage = function(traceUrl, message) {
         traces[traceUrl].records.push(dynamicsCopy);
     }
 }
+
+function deg2rad(deg) {
+    return deg * Math.PI / 180;
+}
+
+var gpsDistanceKm = function(first, second) {
+    var deltaLat = deg2rad(second.latitude) - deg2rad(first.latitude);
+    var deltaLon = deg2rad(second.longitude) - deg2rad(first.longitude);
+    var a = Math.pow(Math.sin(deltaLat / 2), 2) +
+            Math.cos(deg2rad(first.latitude)) *
+            Math.cos(deg2rad(second.latitude)) *
+            Math.pow(Math.sin(deltaLon / 2), 2);
+    var c = 2 * Math.atan2(Math.sqrt(a),Math.sqrt(1 - a));
+    var distance =  c * MEAN_RADIUS_EARTH_KM;
+    return distance;
+}
+
+/* If GPS is available, uses that. Otherwise falls back to odometer reading. */
+var distanceKm = function(first, second) {
+    var gpsAvailable = _.every([first, second], function(record) {
+        return record.latitude && record.longitude;
+    });
+    if(gpsAvailable) {
+        return gpsDistanceKm(first, second);
+    } else {
+        return second.odometer - first.odometer;
+    }
+}

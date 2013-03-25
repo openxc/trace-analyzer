@@ -60,3 +60,7 @@
 .current-data {
     display: none;
 }
+
+.delayed {
+    display: none;
+}

@@ -21,9 +21,9 @@ var updateGasPrices = function(trace) {
                             return memo + parseInt(station.price);
                 }, 0) / stationsWithPrice.length;
 
-                $("#total-fuel-cost").text((averagePrice *
-                        calculateFuelConsumedGallons(trace)).toFixed(2));
-                $("#average-fuel-cost").text(averagePrice.toFixed(2));
+                $("#total-fuel-cost").text(averagePrice *
+                    trace.fuelConsumedGallons.toFixed(2)).parent().show();
+                $("#average-fuel-cost").text(averagePrice.toFixed(2)).parent().show();
             }
         }
     });
@@ -35,7 +35,15 @@ var calculateFuelConsumedGallons = function(trace) {
     return fuelConsumedLiters * .264172;
 }
 
-var updateFuelCost = function(trace) {
-    $("#total-fuel-consumed").text(calculateFuelConsumedGallons(trace).toFixed(2));
+var updateFuelEfficiency = function(trace) {
+    trace.overallFuelEfficiency = distanceKm(_.first(trace.records),
+            _.last(trace.records)) / trace.fuelConsumedGallons;
+        $("#fuel-efficiency").text(trace.overallFuelEfficiency.toFixed(2)).parent().show();
+}
+
+var updateFuelSummary = function(trace) {
+    trace.fuelConsumedGallons = calculateFuelConsumedGallons(trace);
+    $("#total-fuel-consumed").text(trace.fuelConsumedGallons.toFixed(2)).parent().show();
     updateGasPrices(trace);
+    updateFuelEfficiency(trace);
 }
