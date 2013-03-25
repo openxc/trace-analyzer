@@ -53,13 +53,40 @@ var updateFuelSummary = function(trace) {
 }
 
 var calculateCumulativeFuelEfficiency = function(trace) {
+    var brakeEvents = [];
     _.each(trace.records, function(record) {
         record.cumulativeFuelEfficiency = distanceKm(_.first(trace.records), record) /
                 fuelConsumedGallons(_.first(trace.records), record);
+
+        if(record.brake_pedal_status) {
+            if(brakeEvents.length == 0 || _.last(brakeEvents).end) {
+                brakeEvents.push({start: record, end: undefined});
+            }
+        } else {
+            if(brakeEvents.length > 0 && !_.last(brakeEvents).end) {
+                _.last(brakeEvents).end = record;
+            }
+        }
     });
+
+    if(brakeEvents.length > 0 && !_.last(brakeEvents).end) {
+        _.last(brakeEvents).end = _.last(trace.records);
+    }
 
     var key = "cumulativeFuelEfficiency";
     graphs[key] = drawTimeseries(trace, key,
         _.pluck(trace.records, "timestamp"), _.pluck(trace.records, key),
         true, true);
+
+    _.each(brakeEvents, function(brakeEvent) {
+        var brakeEventGroup = graphs[key].graph.append("svg:svg")
+            .attr("class", "brake-event")
+            .attr("opacity", ".2");
+        var brakeArea = brakeEventGroup.append("svg:rect")
+            .attr("x", graphs[key].x(brakeEvent.start.timestamp))
+            .attr("width", graphs[key].x(brakeEvent.end.timestamp) -
+                    graphs[key].x(brakeEvent.start.timestamp))
+            .attr("y", 0)
+            .attr("height", graphs[key].dimensions.height);
+    });
 }

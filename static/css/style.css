@@ -52,6 +52,10 @@
     stroke: green;
 }
 
+.graph .brake-event {
+    fill: #FF6666;
+}
+
 .graph text.annotation {
     font-size: 10px;
     font-weight: normal;
