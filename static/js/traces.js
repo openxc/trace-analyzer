@@ -103,14 +103,22 @@ var gpsDistanceKm = function(first, second) {
     return distance;
 }
 
-/* If GPS is available, uses that. Otherwise falls back to odometer reading. */
+/* If odometer is available, uses that. Otherwise falls back to GPS reading. */
 var distanceKm = function(first, second) {
-    var gpsAvailable = _.every([first, second], function(record) {
+    var odometerAvailable = _.every([first, second], function(record) {
         return record.latitude && record.longitude;
     });
-    if(gpsAvailable) {
-        return gpsDistanceKm(first, second);
-    } else {
+    if(first.odometer && second.odometer) {
         return second.odometer - first.odometer;
+    } else {
+        var gpsAvailable = _.every([first, second], function(record) {
+            return record.latitude && record.longitude;
+        });
+        if(gpsAvailable) {
+            return gpsDistanceKm(first, second);
+        }
+        // TODO aaahhhhhhh, spidey sense is tingling
+        return undefined;
+
     }
 }
