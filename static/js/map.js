@@ -76,7 +76,7 @@ var markLongestStops = function(trace) {
 
         _.each(_.pluck(nonTrivialStops, "start"), function(stop) {
             var marker = new L.CircleMarker(
-                [stop.latitude, stop.longitude], {color: "red"});
+                [stop.latitude, stop.longitude], {radius: 8, color: "red"});
             longestStops.addLayer(marker);
         });
 
