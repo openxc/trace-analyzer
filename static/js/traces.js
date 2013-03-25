@@ -14,6 +14,24 @@ var updateProgress = function(element, progress) {
     $(element).text(progress + "%");
 }
 
+function createXMLHttpRequest() {
+    var xmlhttp = false;
+    if (window.XMLHttpRequest) {
+        xmlhttp = new window.XMLHttpRequest();
+    } else if(window.ActiveXObject) {
+        try {
+            xmlhttp = new window.ActiveXObject("Msxml2.XMLHTTP");
+        } catch (e) {
+            try {
+                xmlhttp = new window.ActiveXObject("Microsoft.XMLHTTP");
+            } catch (e) {
+                xmlhttp = false;
+            }
+        }
+    }
+    return xmlhttp;
+};
+
 var processTrace = function(selectedTrace, data) {
     var count = 0;
     var lastLoggedProgress = 0;
@@ -43,16 +61,21 @@ var processTrace = function(selectedTrace, data) {
 
 var loadTrace = function(selectedTrace) {
     $.ajax({
-        // xhr: function() {
-            // var xhr = new window.XMLHttpRequest();
-            // xhr.addEventListener("progress", function(evt){
-                // if(evt.lengthComputable) {
-                    // var percentComplete = evt.loaded / evt.total;
-                    // updateProgress($("#download-progress progress"), percentComplete * 100);
-                // }
-            // }, false);
-            // return xhr;
-        // },
+        xhr: function() {
+            var xhr = window.ActiveXObject ?
+                    new ActiveXObject("Microsoft.XMLHTTP") : new XMLHttpRequest();
+
+            // TODO this is a shim for IE8
+            if (xhr.addEventListener) {
+                xhr.addEventListener("progress", function(evt){
+                    if(evt.lengthComputable) {
+                        var percentComplete = evt.loaded / evt.total;
+                        updateProgress($("#download-progress progress"), percentComplete * 100);
+                    }
+                }, false);
+            }
+            return xhr;
+        },
         url: selectedTrace,
         success: function(data) {
             finishProgress("download");
