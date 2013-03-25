@@ -21,7 +21,12 @@ var gearHistogramHoverHandler = {
 }
 
 var drawGearHistogram = function(trace) {
-    var context = $("#gear-histogram").get(0).getContext("2d");
+    var element = $("#gear-histogram").get(0);
+    if(!element.getContext) {
+        console.log("No <canvas> element available, not drawing histogram");
+        return;
+    }
+    var context = element.getContext("2d");
 
     var gearDuration = {first: 0, second: 0, third: 0, fourth: 0, fifth: 0, sixth: 0};
     var gearTimeseries = [];

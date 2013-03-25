@@ -43,16 +43,16 @@ var processTrace = function(selectedTrace, data) {
 
 var loadTrace = function(selectedTrace) {
     $.ajax({
-        xhr: function() {
-            var xhr = new window.XMLHttpRequest();
-            xhr.addEventListener("progress", function(evt){
-                if(evt.lengthComputable) {
-                    var percentComplete = evt.loaded / evt.total;
-                    updateProgress($("#download-progress progress"), percentComplete * 100);
-                }
-            }, false);
-            return xhr;
-        },
+        // xhr: function() {
+            // var xhr = new window.XMLHttpRequest();
+            // xhr.addEventListener("progress", function(evt){
+                // if(evt.lengthComputable) {
+                    // var percentComplete = evt.loaded / evt.total;
+                    // updateProgress($("#download-progress progress"), percentComplete * 100);
+                // }
+            // }, false);
+            // return xhr;
+        // },
         url: selectedTrace,
         success: function(data) {
             finishProgress("download");

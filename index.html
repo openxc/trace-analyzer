@@ -1,10 +1,21 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
     <link rel="stylesheet" href="//cdn.leafletjs.com/leaflet-0.5.1/leaflet.css" />
     <!--[if lte IE 8]>
         <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.5.1/leaflet.ie.css" />
     <![endif]-->
+    <!--[if lt IE 9]>
+    <script src="static/js/ie8shim.js"></script>
+    <script type="text/javascript" src="static/js/vendor/aight.js"></script>
+    <![endif]-->
+    <script src="static/js/vendor/d3.v3.js"></script>
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="static/js/vendor/aight.d3.js"></script>
+    <![endif]-->
+
     <link href="static/css/style.css" rel="stylesheet">
     <link href="static/css/bootstrap.min.css" rel="stylesheet">
     <title>OpenXC Vehicle Data Visualization</title>
@@ -24,10 +35,8 @@
                 <div id="analysis-progress">Trace Analysis Progress:
                     <progress value="0" max="100">0%</progress>
                 </div>
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                    Morbi et rhoncus odio. Nam sit amet mi leo, nec ultrices est. Nam nec enim ut
-                    tortor tempor euismod eget sit amet lacus.
-                </p>
+                <p>These visualizations are compatible with IE9+, Google Chrome
+                    and Mozilla Firefox.</p>
 
                 <dl>
 
@@ -149,7 +158,6 @@
     <script src="//cdn.leafletjs.com/leaflet-0.5.1/leaflet.js"></script>
     <script src="//code.jquery.com/jquery-1.9.1.min.js"></script>
     <script src="static/js/vendor/bootstrap.min.js"></script>
-    <script src="http://d3js.org/d3.v3.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore-min.js"></script>
     <script src="static/js/vendor/Chart.min.js"></script>
     <script src="static/js/traces.js"></script>

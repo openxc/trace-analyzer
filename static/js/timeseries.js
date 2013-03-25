@@ -142,7 +142,7 @@ var drawTimeseriesGraphs = function(trace) {
             "accelerator_pedal_position"], function(key, i) {
         graphs[key] = drawTimeseries(trace, key,
             _.pluck(trace.records, "timestamp"), _.pluck(trace.records, key),
-            false. false);
+            false, false);
         return;
     });
 }
