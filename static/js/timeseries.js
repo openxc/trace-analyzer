@@ -12,6 +12,14 @@ var initDimensions = function(elementId) {
     return {width: width, height: height, xOffset: xOffset, yOffset: yOffset};
 }
 
+var maxFinite = function(collection) {
+    var max = collection[0];
+    _.each(collection, function(item) {
+        max = (isFinite(item) && (!max || item > max)) ? item : max;
+    });
+    return max;
+}
+
 var drawTimeseries = function(trace, elementId, dataX, dataY, showAverage,
         showMax) {
     // create an SVG element inside the element that fills 100% of the div
@@ -25,7 +33,7 @@ var drawTimeseries = function(trace, elementId, dataX, dataY, showAverage,
     var x = d3.scale.linear().domain([_.min(dataX), _.max(dataX)]).range(
             [0, dimensions.width]);
     // Y scale will fit values from 0-10 within pixels 0-100
-    var y = d3.scale.linear().domain([_.min(dataY), _.max(dataY)]).range(
+    var y = d3.scale.linear().domain([_.min(dataY), maxFinite(dataY)]).range(
             [dimensions.height, 0]);
 
     // create a line object that represents the SVG line we're creating
@@ -37,7 +45,7 @@ var drawTimeseries = function(trace, elementId, dataX, dataY, showAverage,
             return y(d[1]);
         })
         .defined(function(d) {
-            return !isNaN(d[1]);
+            return isFinite(d[1]);
         });
 
     var hoverLineGroup = graph.append("svg:svg").attr("class", "hover-line");
@@ -60,7 +68,10 @@ var drawTimeseries = function(trace, elementId, dataX, dataY, showAverage,
 
     if(showAverage) {
         var average = _.reduce(dataY, function(memo, value) {
-                return memo + (value || 0);
+                if(!value || value == Infinity) {
+                    return memo;
+                }
+                return memo + value;
             }, 0) / dataY.length;
         var averageLineGroup = graph.append("svg:svg")
             .attr("class", "average-line")

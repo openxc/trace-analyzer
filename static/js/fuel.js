@@ -1,3 +1,5 @@
+var MILES_PER_KM = 0.621371;
+
 var updateGasPrices = function(trace) {
     var gasDistance = 5;
     var apiKey = "rfej9napna";
@@ -40,8 +42,8 @@ var calculateFuelConsumedGallons = function(trace) {
 }
 
 var updateFuelEfficiency = function(trace) {
-    trace.overallFuelEfficiency = distanceKm(_.first(trace.records),
-            _.last(trace.records)) / trace.fuelConsumedGallons;
+    trace.overallFuelEfficiency = distanceMiles(_.first(trace.records),
+        _.last(trace.records)) / trace.fuelConsumedGallons;
     $("#fuel-efficiency").text(trace.overallFuelEfficiency.toFixed(2)).parent().show();
 }
 
@@ -55,7 +57,9 @@ var updateFuelSummary = function(trace) {
 var calculateCumulativeFuelEfficiency = function(trace) {
     var brakeEvents = [];
     _.each(trace.records, function(record) {
-        record.cumulativeFuelEfficiency = distanceKm(_.first(trace.records), record) /
+        // this value could be infinity if we are on electric only power
+        record.cumulativeFuelEfficiency =
+            distanceMiles(_.first(trace.records), record) /
                 fuelConsumedGallons(_.first(trace.records), record);
 
         if(record.brake_pedal_status) {
@@ -76,7 +80,7 @@ var calculateCumulativeFuelEfficiency = function(trace) {
     var key = "cumulativeFuelEfficiency";
     graphs[key] = drawTimeseries(trace, key,
         _.pluck(trace.records, "timestamp"), _.pluck(trace.records, key),
-        true, true);
+        false, true);
 
     _.each(brakeEvents, function(brakeEvent) {
         var brakeEventGroup = graphs[key].graph.append("svg:svg")

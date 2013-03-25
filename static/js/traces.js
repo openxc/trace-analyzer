@@ -122,3 +122,11 @@ var distanceKm = function(first, second) {
 
     }
 }
+
+var kmToMiles = function(km) {
+    return km * MILES_PER_KM;
+}
+
+var distanceMiles = function(first, second) {
+    return kmToMiles(distanceKm(first, second));
+}
