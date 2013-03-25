@@ -103,7 +103,11 @@ var timeseriesHoverHandler = {
 
             var hoveredValue = findClosestToX(timestamp,
                 otherGraph.dataX, otherGraph.dataY)[1];
-            $("#current_" + otherGraph.elementId).text(hoveredValue.toFixed(2)).parent().show();
+            if(hoveredValue) {
+                $("#current_" + otherGraph.elementId).text(hoveredValue.toFixed(2)).parent().show();
+            } else {
+                $("#current_" + otherGraph.elementId).parent().hide();
+            }
         });
     },
     off: function() {

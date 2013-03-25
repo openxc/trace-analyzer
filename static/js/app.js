@@ -41,6 +41,7 @@ $(document).ready(function() {
     onTraceLoadCallbacks.push(drawTimeseriesGraphs);
     onTraceLoadCallbacks.push(renderGpsTrace);
     onTraceLoadCallbacks.push(updateFuelSummary);
+    onTraceLoadCallbacks.push(calculateCumulativeFuelEfficiency);
     onTraceLoadCallbacks.push(drawGearHistogram);
 
     hoverHandlers.push(timeseriesHoverHandler);

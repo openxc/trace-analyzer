@@ -29,16 +29,20 @@ var updateGasPrices = function(trace) {
     });
 }
 
-var calculateFuelConsumedGallons = function(trace) {
-    var fuelConsumedLiters = _.last(trace.records).fuel_consumed_since_restart -
-            _.first(trace.records).fuel_consumed_since_restart;
+var fuelConsumedGallons = function(a, b) {
+    var fuelConsumedLiters = b.fuel_consumed_since_restart -
+            a.fuel_consumed_since_restart;
     return fuelConsumedLiters * .264172;
+}
+
+var calculateFuelConsumedGallons = function(trace) {
+    return fuelConsumedGallons(_.first(trace.records), _.last(trace.records));
 }
 
 var updateFuelEfficiency = function(trace) {
     trace.overallFuelEfficiency = distanceKm(_.first(trace.records),
             _.last(trace.records)) / trace.fuelConsumedGallons;
-        $("#fuel-efficiency").text(trace.overallFuelEfficiency.toFixed(2)).parent().show();
+    $("#fuel-efficiency").text(trace.overallFuelEfficiency.toFixed(2)).parent().show();
 }
 
 var updateFuelSummary = function(trace) {
@@ -46,4 +50,16 @@ var updateFuelSummary = function(trace) {
     $("#total-fuel-consumed").text(trace.fuelConsumedGallons.toFixed(2)).parent().show();
     updateGasPrices(trace);
     updateFuelEfficiency(trace);
+}
+
+var calculateCumulativeFuelEfficiency = function(trace) {
+    _.each(trace.records, function(record) {
+        record.cumulativeFuelEfficiency = distanceKm(_.first(trace.records), record) /
+                fuelConsumedGallons(_.first(trace.records), record);
+    });
+
+    var key = "cumulativeFuelEfficiency";
+    graphs[key] = drawTimeseries(trace, key,
+        _.pluck(trace.records, "timestamp"), _.pluck(trace.records, key),
+        true, true);
 }

@@ -72,8 +72,17 @@
                 <p class="delayed"><span id="total-fuel-consumed"></span>
                   Gallons == ~$<span id="total-fuel-cost"></span> Total
                   (@ $<span id="average-fuel-cost"></span>/gallon)</p>
-                <p class="delayed"><span id="fuel-efficiency"></span> MPG</p>
 
+            </div>
+        </div>
+        <div class="row">
+            <div class="span7 graph-container">
+                <div id="cumulativeFuelEfficiency" class="graph"></div>
+            </div>
+            <div class="span4 graph-comments">
+                <h3>Fuel Efficiency</h3>
+                <p class="delayed"><span id="fuel-efficiency"></span> MPG Overall</p>
+                <p class="current-data"><span id="current_cumulativeFuelEfficiency"></span> MPG Cumulative</p>
             </div>
         </div>
         <div class="row">
@@ -127,8 +136,8 @@
             <a class="" href="/files/commute.json"/>
             <a class="" href="/files/commute-short.json"/>
             <a class="" href="/files/2013-03-23-16.json"/>
-            <a class="active" href="/files/2013-03-23-19.json"/>
-            <a class="" href="/files/2013-03-23-22.json"/>
+            <a class="" href="/files/2013-03-23-19.json"/>
+            <a class="active" href="/files/2013-03-23-22.json"/>
             <a class="" href="http://openxcplatform.com.s3.amazonaws.com/traces/localwithgps.json"/>
             <a class="" href="http://openxcplatform.com.s3.amazonaws.com/traces/commute.json"/>
         </div>
