@@ -20,7 +20,11 @@ var processTrace = function(selectedTrace, data) {
     var progressElement = $("#analysis-progress progress");
     _.each(data.split("\n"), function(line, i) {
         if(line) {
-            handleMessage(selectedTrace, JSON.parse(line));
+            try {
+                handleMessage(selectedTrace, JSON.parse(line));
+            } catch(e) {
+                console.log("Unable to parse " + line + " (" + e + ")");
+            }
             count += line.length;
             var progress = count / data.length * 100;
             if(progress >= lastLoggedProgress + 1) {
