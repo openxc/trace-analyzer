@@ -48,5 +48,11 @@ $(document).ready(function() {
     hoverHandlers.push(mapHoverHandler);
     hoverHandlers.push(gearHistogramHoverHandler);
 
-    loadTrace($("#traces .active").attr("href"));
+    $("#traces .active").each(function(i, e) {
+        $(e).click(function(event){
+            event.preventDefault();
+            loadTrace($(event).attr("href"));
+            return false;
+        });
+    });
 });

@@ -60,29 +60,36 @@ var processTrace = function(selectedTrace, data) {
 }
 
 var loadTrace = function(selectedTrace) {
-    $.ajax({
-        xhr: function() {
-            var xhr = window.ActiveXObject ?
-                    new ActiveXObject("Microsoft.XMLHTTP") : new XMLHttpRequest();
+    if(_.has(traces, traceUrl)) {
+        _.each(onTraceLoadCallbacks, function(callback) {
+            callback(traces[selectedTrace]);
+        });
+    } else {
+        traces[traceUrl] = {url: traceUrl, records: []};
+        $.ajax({
+            xhr: function() {
+                var xhr = window.ActiveXObject ?
+                        new ActiveXObject("Microsoft.XMLHTTP") : new XMLHttpRequest();
 
-            // TODO this is a shim for IE8
-            if (xhr.addEventListener) {
-                xhr.addEventListener("progress", function(evt){
-                    if(evt.lengthComputable) {
-                        var percentComplete = evt.loaded / evt.total;
-                        updateProgress($("#download-progress progress"), percentComplete * 100);
-                    }
-                }, false);
-            }
-            return xhr;
-        },
-        url: selectedTrace,
-        success: function(data) {
-            finishProgress("download");
-            processTrace(selectedTrace, data);
-        },
-        dataType: "text"
-    });
+                // TODO this is a shim for IE8
+                if (xhr.addEventListener) {
+                    xhr.addEventListener("progress", function(evt){
+                        if(evt.lengthComputable) {
+                            var percentComplete = evt.loaded / evt.total;
+                            updateProgress($("#download-progress progress"), percentComplete * 100);
+                        }
+                    }, false);
+                }
+                return xhr;
+            },
+            url: selectedTrace,
+            success: function(data) {
+                finishProgress("download");
+                processTrace(selectedTrace, data);
+            },
+            dataType: "text"
+        });
+    }
 }
 
 var handleMessage = function(traceUrl, message) {
