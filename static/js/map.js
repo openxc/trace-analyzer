@@ -117,6 +117,8 @@ var highlightSlowSections = function(trace) {
         trace.mapLayerGroups.slowSections = slowSections;
     }
 
+    trace.mapControls.addOverlay(trace.mapLayerGroups.slowSections,
+        "Slow Sections");
     map.addLayer(trace.mapLayerGroups.slowSections);
 }
 
@@ -152,6 +154,7 @@ var renderGpsTrace = function(trace) {
                 [path, start, end]);
     }
 
+    trace.mapControls = L.control.layers().addTo(map);
     map.addLayer(trace.mapLayerGroups.base);
     map.fitBounds(trace.mapLayerGroups.base.getBounds());
 
