@@ -83,6 +83,8 @@ var markLongestStops = function(trace) {
         trace.mapLayerGroups.longestStops = longestStops;
     }
 
+    trace.mapControls.addOverlay(trace.mapLayerGroups.longestStops,
+        "Longest Stops");
     map.addLayer(trace.mapLayerGroups.longestStops);
 }
 
