@@ -1,5 +1,5 @@
 #map {
-    height: 460px;
+    height: 620px;
     width: 540px;
 }
 
@@ -72,5 +72,10 @@
 }
 
 footer {
-    margin-top: 20px;
+    margin-top: 30px;
+}
+
+img.logo {
+    padding-top: 10px;
+    padding-bottom: 10px;
 }
