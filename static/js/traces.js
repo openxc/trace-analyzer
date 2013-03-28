@@ -8,6 +8,15 @@ var finishProgress = function(type) {
     }, 8);
 }
 
+var timestampHoverHandler = {
+    on: function(timestamp, trace) {
+        $("#current_timestamp").text(timestamp.toFixed(2)).parent().show();
+    },
+    off: function() {
+        $("#current_timestamp").parent().hide();
+    }
+}
+
 var updateProgress = function(element, progress) {
     $(element).show();
     $(element).attr("value", progress);
