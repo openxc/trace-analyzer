@@ -104,7 +104,7 @@ var highlightSlowSections = function(trace) {
             var position = [record.latitude, record.longitude];
             if(!recordedPositionEqual(lastPosition, record) &&
                     record.vehicle_speed > 1 &&
-                    record.vehicle_speed < SPEED_LIMIT_KPH) {
+                    record.vehicle_speed < SPEED_LIMIT_KPH * .8) {
                 path.addLatLng(position);
                 lastPosition = record;
             } else if(path.getLatLngs().length > 0) {
