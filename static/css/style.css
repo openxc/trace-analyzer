@@ -1,3 +1,7 @@
+body {
+    font-size: 12px;
+}
+
 #map {
     height: 680px;
     width: 540px;
