@@ -32,6 +32,17 @@ var handleMouseOverGraph = function(event, trace, graph) {
     }
 };
 
+var traceStatusHandler = {
+    onLoad: function() {
+        $("#trace-status").removeClass();
+        $("#trace-status").addClass("icon-ok");
+    },
+    onUnload: function() {
+        $("#trace-status").removeClass();
+        $("#trace-status").addClass("icon-refresh");
+    }
+};
+
 $(document).ready(function() {
     map = L.map('map', {zoom: 10});
     L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
@@ -40,12 +51,14 @@ $(document).ready(function() {
     }).addTo(map);
 
 
+    onTraceLoadCallbacks.push(traceStatusHandler.onLoad);
     onTraceLoadCallbacks.push(timeseriesHandler.onLoad);
     onTraceLoadCallbacks.push(mapRenderHandler.onLoad);
     onTraceLoadCallbacks.push(updateFuelSummary);
     onTraceLoadCallbacks.push(calculateCumulativeFuelEfficiency);
     onTraceLoadCallbacks.push(drawGearHistogram);
 
+    onTraceUnloadCallbacks.push(traceStatusHandler.onUnload);
     onTraceUnloadCallbacks.push(timeseriesHandler.onUnload);
     onTraceUnloadCallbacks.push(mapRenderHandler.onUnload);
 
@@ -55,6 +68,7 @@ $(document).ready(function() {
     hoverHandlers.push(timestampHoverHandler);
 
     $("#traces").change(function(event) {
+        traceStatusHandler.onUnload();
         loadTrace($("#traces option:selected").val());
         return false;
     }).change();
