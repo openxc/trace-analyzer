@@ -1,12 +1,14 @@
 var traces = {};
 var dynamics = {};
+var activeTrace;
 
 var finishProgress = function(type) {
-    $("#" + type + "-progress").text("Trace " + type + " complete.");
+    $("#" + type + "-progress progress").hide();
+    $("#" + type + "-progress").append("Done.");
     setTimeout(function() {
         $("#" + type + "-progress").hide();
     }, 8);
-}
+};
 
 var timestampHoverHandler = {
     on: function(timestamp, trace) {
@@ -15,36 +17,22 @@ var timestampHoverHandler = {
     off: function() {
         $("#current_timestamp").parent().hide();
     }
-}
+};
 
 var updateProgress = function(element, progress) {
-    $(element).show();
+    $(element).parent().hide();
+    $(element).hide();
     $(element).attr("value", progress);
     $(element).text(progress + "%");
-}
-
-function createXMLHttpRequest() {
-    var xmlhttp = false;
-    if (window.XMLHttpRequest) {
-        xmlhttp = new window.XMLHttpRequest();
-    } else if(window.ActiveXObject) {
-        try {
-            xmlhttp = new window.ActiveXObject("Msxml2.XMLHTTP");
-        } catch (e) {
-            try {
-                xmlhttp = new window.ActiveXObject("Microsoft.XMLHTTP");
-            } catch (e) {
-                xmlhttp = false;
-            }
-        }
-    }
-    return xmlhttp;
+    $(element).parent().show();
+    $(element).show();
 };
 
 var processTrace = function(selectedTrace, data) {
     var count = 0;
     var lastLoggedProgress = 0;
     var progressElement = $("#analysis-progress progress");
+    updateProgress(progressElement, 0);
     _.each(data.split("\n"), function(line, i) {
         if(line) {
             try {
@@ -61,18 +49,26 @@ var processTrace = function(selectedTrace, data) {
         }
     });
 
-    _.each(onTraceLoadCallbacks, function(callback) {
-        callback(traces[selectedTrace]);
-    });
-
+    activateTrace(selectedTrace);
     finishProgress("analysis");
-}
+};
 
-var loadTrace = function(selectedTrace) {
-    if(_.has(traces, traceUrl)) {
-        _.each(onTraceLoadCallbacks, function(callback) {
-            callback(traces[selectedTrace]);
+var activateTrace = function(traceUrl) {
+    if(activeTrace) {
+        _.each(onTraceUnloadCallbacks, function(callback) {
+            callback(activeTrace);
         });
+    }
+
+    activeTrace = traces[traceUrl];
+    _.each(onTraceLoadCallbacks, function(callback) {
+        callback(activeTrace);
+    });
+};
+
+var loadTrace = function(traceUrl) {
+    if(_.has(traces, traceUrl)) {
+        activateTrace(traceUrl);
     } else {
         traces[traceUrl] = {url: traceUrl, records: []};
         $.ajax({
@@ -91,15 +87,17 @@ var loadTrace = function(selectedTrace) {
                 }
                 return xhr;
             },
-            url: selectedTrace,
+            url: traceUrl,
             success: function(data) {
                 finishProgress("download");
-                processTrace(selectedTrace, data);
+                setTimeout(function() {
+                    processTrace(traceUrl, data);
+                }, 8);
             },
             dataType: "text"
         });
     }
-}
+};
 
 var handleMessage = function(traceUrl, message) {
     if(!message) {
@@ -124,11 +122,11 @@ var handleMessage = function(traceUrl, message) {
     } else {
         traces[traceUrl].records.push(dynamicsCopy);
     }
-}
+};
 
-function deg2rad(deg) {
+var deg2rad = function(deg) {
     return deg * Math.PI / 180;
-}
+};
 
 var gpsDistanceKm = function(first, second) {
     var deltaLat = deg2rad(second.latitude) - deg2rad(first.latitude);
@@ -140,32 +138,32 @@ var gpsDistanceKm = function(first, second) {
     var c = 2 * Math.atan2(Math.sqrt(a),Math.sqrt(1 - a));
     var distance =  c * MEAN_RADIUS_EARTH_KM;
     return distance;
-}
+};
 
 /* If odometer is available, uses that. Otherwise falls back to GPS reading. */
 var distanceKm = function(first, second) {
     var odometerAvailable = _.every([first, second], function(record) {
         return record.latitude && record.longitude;
     });
+    var distance;
     if(first.odometer && second.odometer) {
-        return second.odometer - first.odometer;
+        distance = second.odometer - first.odometer;
     } else {
         var gpsAvailable = _.every([first, second], function(record) {
             return record.latitude && record.longitude;
         });
-        if(gpsAvailable) {
-            return gpsDistanceKm(first, second);
-        }
-        // TODO aaahhhhhhh, spidey sense is tingling
-        return undefined;
 
+        if(gpsAvailable) {
+            distance = gpsDistanceKm(first, second);
+        }
     }
-}
+    return distance;
+};
 
 var kmToMiles = function(km) {
     return km * MILES_PER_KM;
-}
+};
 
 var distanceMiles = function(first, second) {
     return kmToMiles(distanceKm(first, second));
-}
+};

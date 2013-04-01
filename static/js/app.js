@@ -1,5 +1,6 @@
 var onTraceLoadCallbacks = [];
-var hoverHandlers = []
+var onTraceUnloadCallbacks = [];
+var hoverHandlers = [];
 
 // TODO no steady step in the graphs, so we can ball park it or brute force
 // TODO is this zipped data available through the graph?
@@ -7,13 +8,13 @@ var findClosestToX = function(targetX, dataX, dataY) {
     return _.find(_.zip(dataX, dataY), function(element) {
         return element[0] > targetX - 1 && element[0] < targetX + 1;
     });
-}
+};
 
 var handleMouseOutGraph = function(event) {
     _.each(hoverHandlers, function(handler) {
         handler.off();
     });
-}
+};
 
 var handleMouseOverGraph = function(event, trace, graph) {
     var mouseX = event.pageX - graph.dimensions.xOffset;
@@ -29,7 +30,7 @@ var handleMouseOverGraph = function(event, trace, graph) {
     } else {
         handleMouseOutGraph(event);
     }
-}
+};
 
 $(document).ready(function() {
     map = L.map('map', {zoom: 10});
@@ -38,22 +39,22 @@ $(document).ready(function() {
         maxZoom: 16
     }).addTo(map);
 
+
     onTraceLoadCallbacks.push(drawTimeseriesGraphs);
-    onTraceLoadCallbacks.push(renderGpsTrace);
+    onTraceLoadCallbacks.push(mapRenderHandler.onLoad);
     onTraceLoadCallbacks.push(updateFuelSummary);
     onTraceLoadCallbacks.push(calculateCumulativeFuelEfficiency);
     onTraceLoadCallbacks.push(drawGearHistogram);
+
+    onTraceUnloadCallbacks.push(mapRenderHandler.onUnload);
 
     hoverHandlers.push(timeseriesHoverHandler);
     hoverHandlers.push(mapHoverHandler);
     hoverHandlers.push(gearHistogramHoverHandler);
     hoverHandlers.push(timestampHoverHandler);
 
-    $("#traces .active").each(function(i, e) {
-        $(e).click(function(event){
-            event.preventDefault();
-            loadTrace($(event).attr("href"));
-            return false;
-        });
-    });
+    $("#traces").change(function(event) {
+        loadTrace($("#traces option:selected").val());
+        return false;
+    }).change();
 });

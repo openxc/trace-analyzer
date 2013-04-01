@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     <link rel="stylesheet" href="static/css/vendor/leaflet.css" />
     <!--[if lte IE 8]>
         <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.5.1/leaflet.ie.css" />
@@ -30,12 +30,6 @@
             <div class="span4">
                 <a href="http://openxcplatform.com"><img class="logo" src="static/img/openxc-logo.png"
                             alt="OpenXC Visualization"/></a>
-                <div id="download-progress">Trace Download Progress:
-                    <progress value="0" max="100">0%</progress>
-                </div>
-                <div id="analysis-progress">Trace Analysis Progress:
-                    <progress value="0" max="100">0%</progress>
-                </div>
                 <p>This map and graphs are visualizations of data collected
                     using the <a href="http://openxcplatform.com">OpenXC
                         Platform</a>. OpenXC is an open souce software and
@@ -53,27 +47,23 @@
                     and Mozilla Firefox. The map overlays can be toggled via the
                     layers button.</p>
 
-                <div id="traces">
-                    <a class="" href="/files/annarbor.json"/>
-                    <a class="" href="/files/commute.json"/>
-                    <a class="" href="/files/commute-short.json"/>
-                    <a class="" href="/files/2013-03-23-16.json"/>
-                    <a class="" href="/files/2013-03-23-19.json"/>
-                    <a class="" href="/files/2013-03-23-22.json"/>
-                    <a class="" href="/files/2013-03-25-09.json"/>
-                    <a class="" href="/files/cmaxlog.json"/>
-                    <a class="" href="/files/2013-03-26-10.json"/>
-                    <a class="" href="/files/2013-03-26-11.json"/>
-                    <a class="" href="/files/shorter.json"/>
-                    <a class="" href="http://openxcplatform.com.s3.amazonaws.com/traces/nyc/downtown-crosstown.json"/>
-                    <a class="" href="http://openxcplatform.com.s3.amazonaws.com/traces/nyc/downtown-east.json"/>
-                    <a class="" href="http://openxcplatform.com.s3.amazonaws.com/traces/nyc/downtown-west2.json"/>
-                    <a class="" href="http://openxcplatform.com.s3.amazonaws.com/traces/nyc/downtown-west.json"/>
-                    <a class="" href="http://openxcplatform.com.s3.amazonaws.com/traces/nyc/uptown-crossdown.json"/>
-                    <a class="" href="http://openxcplatform.com.s3.amazonaws.com/traces/nyc/uptown-crosstown.json"/>
-                    <a class="" href="http://openxcplatform.com.s3.amazonaws.com/traces/nyc/uptown-west2.json"/>
-                    <a class="" href="http://openxcplatform.com.s3.amazonaws.com/traces/nyc/uptown-west.json"/>
-                    <a class="" href="http://openxcplatform.com.s3.amazonaws.com/traces/localwithgps.json"/>
+                <label for="traces">Select a Trace File</label>
+                <select id="traces">
+                    <option selected value="http://openxcplatform.com.s3.amazonaws.com/traces/nyc/downtown-crosstown.json">Downtown, Crosstown</option>
+                    <option value="http://openxcplatform.com.s3.amazonaws.com/traces/nyc/downtown-east.json">East Downtown</option>
+                    <option value="http://openxcplatform.com.s3.amazonaws.com/traces/nyc/downtown-west2.json">West Downtown</option>
+                    <option value="http://openxcplatform.com.s3.amazonaws.com/traces/nyc/downtown-west.json">West Downtown 2</option>
+                    <option value="http://openxcplatform.com.s3.amazonaws.com/traces/nyc/uptown-crossdown.json">Uptown Crosstown</option>
+                    <option value="http://openxcplatform.com.s3.amazonaws.com/traces/nyc/uptown-crosstown.json">Uptown Crosstown 2</option>
+                    <option value="http://openxcplatform.com.s3.amazonaws.com/traces/nyc/uptown-west2.json">West Uptown </option>
+                    <option value="http://openxcplatform.com.s3.amazonaws.com/traces/nyc/uptown-west.json">West Uptown</option>
+                    <option value="http://openxcplatform.com.s3.amazonaws.com/traces/localwithgps.json">Trace 1</option>
+                </select>
+                <div id="download-progress">Trace Download Progress:
+                    <progress value="0" max="100">0%</progress>
+                </div>
+                <div id="analysis-progress">Trace Analysis Progress:
+                    <progress value="0" max="100">0%</progress>
                 </div>
 
                 <dl>

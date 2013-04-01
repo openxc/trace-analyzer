@@ -1,5 +1,5 @@
 var map;
-var activeMapLayer = undefined;
+var activeMapLayer;
 var hoverMapMarker;
 
 // TODO hard coded for NYC demo, but could look this up dynamically in the
@@ -27,13 +27,13 @@ var mapHoverHandler = {
     off: function() {
         map.removeLayer(hoverMapMarker);
     }
-}
+};
 
 var recordsWithPosition =  function(records) {
     return _.filter(records, function(record) {
         return record.latitude && record.longitude;
     });
-}
+};
 
 // TODO we could optimize this and only go over the path once, yielding
 // positions to these functions each time and then calling a finish() method,
@@ -43,7 +43,7 @@ var markLongestStops = function(trace) {
     if(!_.has(trace.mapLayerGroups, "longestStops")) {
         var longestStops = L.featureGroup();
         var stops = [];
-        var stoppedAt = undefined;
+        var stoppedAt;
         var records = recordsWithPosition(trace.records);
         var lastPosition = _.first(records);
 
@@ -53,7 +53,7 @@ var markLongestStops = function(trace) {
                 if(!stoppedAt) {
                     // TODO could just use odometer...
                     if(stops.length > 0 &&
-                            distanceKm(_.last(stops).start, record) < .2) {
+                            distanceKm(_.last(stops).start, record) < 0.2) {
                         stoppedAt = stops.pop().start;
                     } else {
                         stoppedAt = record;
@@ -81,17 +81,17 @@ var markLongestStops = function(trace) {
         });
 
         trace.mapLayerGroups.longestStops = longestStops;
+        trace.mapControls.addOverlay(trace.mapLayerGroups.longestStops,
+            "Longest Stops");
     }
 
-    trace.mapControls.addOverlay(trace.mapLayerGroups.longestStops,
-        "Longest Stops");
     map.addLayer(trace.mapLayerGroups.longestStops);
-}
+};
 
 var recordedPositionEqual = function(a, b) {
     return a.latitude && a.longitude && b.latitude && b.longitude &&
         a.latitude === b.latitude && a.longitude && b.longitude;
-}
+};
 
 var highlightSlowSections = function(trace) {
     if(!_.has(trace.mapLayerGroups, "slowSections")) {
@@ -104,7 +104,7 @@ var highlightSlowSections = function(trace) {
             var position = [record.latitude, record.longitude];
             if(!recordedPositionEqual(lastPosition, record) &&
                     record.vehicle_speed > 1 &&
-                    record.vehicle_speed < SPEED_LIMIT_KPH * .8) {
+                    record.vehicle_speed < SPEED_LIMIT_KPH * 0.8) {
                 path.addLatLng(position);
                 lastPosition = record;
             } else if(path.getLatLngs().length > 0) {
@@ -117,49 +117,54 @@ var highlightSlowSections = function(trace) {
             slowSections.addLayer(path);
         }
         trace.mapLayerGroups.slowSections = slowSections;
+        trace.mapControls.addOverlay(trace.mapLayerGroups.slowSections,
+            "Slow Sections");
     }
 
-    trace.mapControls.addOverlay(trace.mapLayerGroups.slowSections,
-        "Slow Sections");
     map.addLayer(trace.mapLayerGroups.slowSections);
-}
+};
 
-var renderGpsTrace = function(trace) {
-    _.each(traces, function(trace) {
-        _.each(trace.mapLayerGroups, function(layer, layerName) {
-            if(layerName != trace.url) {
-                map.removeLayer(layer);
-            }
+var mapRenderHandler = {
+    onLoad: function(trace) {
+        if(!_.has(trace, "mapLayerGroups")) {
+            trace.mapLayerGroups = {};
+        }
+
+        if(!_.has(trace.mapLayerGroups, "base")) {
+            var path = L.polyline([], {color: 'green', width: 20});
+            var records = recordsWithPosition(trace.records);
+            var lastPosition = _.first(records);
+            _.each(records, function(record) {
+                if(!recordedPositionEqual(lastPosition, record)) {
+                    path.addLatLng([record.latitude, record.longitude]);
+                    lastPosition = record;
+                }
+            });
+
+            var start = new L.CircleMarker(_.first(path.getLatLngs()),
+                    {color: "blue"});
+            var end = new L.CircleMarker(_.last(path.getLatLngs()),
+                    {color: "green"});
+            trace.mapLayerGroups.base = L.featureGroup(
+                    [path, start, end]);
+        }
+
+        if(!_.has(trace, "mapControls")) {
+            trace.mapControls = L.control.layers();
+        }
+
+        trace.mapControls.addTo(map);
+        map.addLayer(trace.mapLayerGroups.base);
+        map.fitBounds(trace.mapLayerGroups.base.getBounds());
+
+        highlightSlowSections(trace);
+        markLongestStops(trace);
+    },
+    onUnload: function(trace) {
+        _.each(trace.mapLayerGroups, function(group) {
+            map.removeLayer(group);
         });
-    });
 
-    if(!_.has(trace, "mapLayerGroups")) {
-        trace.mapLayerGroups = {};
+        trace.mapControls.removeFrom(map);
     }
-
-    if(!_.has(trace.mapLayerGroups, "base")) {
-        var path = L.polyline([], {color: 'green', width: 20});
-        var records = recordsWithPosition(trace.records);
-        var lastPosition = _.first(records);
-        _.each(records, function(record) {
-            if(!recordedPositionEqual(lastPosition, record)) {
-                path.addLatLng([record.latitude, record.longitude]);
-                lastPosition = record;
-            }
-        });
-
-        var start = new L.CircleMarker(_.first(path.getLatLngs()),
-                {color: "blue"});
-        var end = new L.CircleMarker(_.last(path.getLatLngs()),
-                {color: "green"});
-        trace.mapLayerGroups.base = L.featureGroup(
-                [path, start, end]);
-    }
-
-    trace.mapControls = L.control.layers().addTo(map);
-    map.addLayer(trace.mapLayerGroups.base);
-    map.fitBounds(trace.mapLayerGroups.base.getBounds());
-
-    highlightSlowSections(trace);
-    markLongestStops(trace);
-}
+};
