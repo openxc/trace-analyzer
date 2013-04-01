@@ -40,12 +40,13 @@ $(document).ready(function() {
     }).addTo(map);
 
 
-    onTraceLoadCallbacks.push(drawTimeseriesGraphs);
+    onTraceLoadCallbacks.push(timeseriesHandler.onLoad);
     onTraceLoadCallbacks.push(mapRenderHandler.onLoad);
     onTraceLoadCallbacks.push(updateFuelSummary);
     onTraceLoadCallbacks.push(calculateCumulativeFuelEfficiency);
     onTraceLoadCallbacks.push(drawGearHistogram);
 
+    onTraceUnloadCallbacks.push(timeseriesHandler.onUnload);
     onTraceUnloadCallbacks.push(mapRenderHandler.onUnload);
 
     hoverHandlers.push(timeseriesHoverHandler);

@@ -10,7 +10,7 @@ var initDimensions = function(elementId) {
     xOffset = $("#" + elementId).offset().left;
     yOffset = $("#" + elementId).offset().top;
     return {width: width, height: height, xOffset: xOffset, yOffset: yOffset};
-}
+};
 
 var maxFinite = function(collection) {
     var max = collection[0];
@@ -18,7 +18,7 @@ var maxFinite = function(collection) {
         max = (isFinite(item) && (!max || item > max)) ? item : max;
     });
     return max;
-}
+};
 
 var drawTimeseries = function(trace, elementId, dataX, dataY, showAverage,
         showMax) {
@@ -68,7 +68,7 @@ var drawTimeseries = function(trace, elementId, dataX, dataY, showAverage,
 
     if(showAverage) {
         var average = _.reduce(dataY, function(memo, value) {
-                if(!value || value == Infinity) {
+                if(!value || value === Infinity) {
                     return memo;
                 }
                 return memo + value;
@@ -102,7 +102,7 @@ var drawTimeseries = function(trace, elementId, dataX, dataY, showAverage,
     });
 
     return graphHolder;
-}
+};
 
 var timeseriesHoverHandler = {
     on: function(timestamp, trace, mouseX, mouseY) {
@@ -110,7 +110,7 @@ var timeseriesHoverHandler = {
             otherGraph.hoverLine.classed("hide", false);
 
             // set position of hoverLine
-            otherGraph.hoverLine.attr("x1", mouseX).attr("x2", mouseX)
+            otherGraph.hoverLine.attr("x1", mouseX).attr("x2", mouseX);
 
             var hoveredValue = findClosestToX(timestamp,
                 otherGraph.dataX, otherGraph.dataY)[1];
@@ -127,23 +127,33 @@ var timeseriesHoverHandler = {
             $("#current_" + graph.elementId).parent().hide();
         });
     }
-}
+};
 
-var drawTimeseriesGraphs = function(trace) {
-    _.each(["vehicle_speed", "engine_speed", "torque_at_transmission"],
-            function(key, i) {
-        graphs[key] = drawTimeseries(trace, key,
-            _.pluck(trace.records, "timestamp"), _.pluck(trace.records, key),
-            true, true);
-        return;
-    });
+var timeseriesHandler = {
+    onLoad: function(trace) {
+        _.each(["vehicle_speed", "engine_speed", "torque_at_transmission"],
+                function(key, i) {
+            graphs[key] = drawTimeseries(trace, key,
+                _.pluck(trace.records, "timestamp"),
+                _.pluck(trace.records, key),
+                true, true);
+            return;
+        });
 
-    _.each(["odometer", "fuel_consumed_since_restart",
-            "accelerator_pedal_position"], function(key, i) {
-        graphs[key] = drawTimeseries(trace, key,
-            _.pluck(trace.records, "timestamp"), _.pluck(trace.records, key),
-            false, false);
-        return;
-    });
-}
+        _.each(["odometer", "fuel_consumed_since_restart",
+                "accelerator_pedal_position"], function(key, i) {
+            graphs[key] = drawTimeseries(trace, key,
+                _.pluck(trace.records, "timestamp"),
+                _.pluck(trace.records, key),
+                false, false);
+            return;
+        });
+    },
+    onUnload: function(trace) {
+        // TODO could make this faster by caching the graphs instead of forcing
+        // re-render, but there really isn't much delay in recalculating right
+        // now
+        d3.selectAll(".graph svg").remove();
+    }
+};
 
