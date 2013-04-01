@@ -13,6 +13,24 @@ and if you have Python 3:
 
     trace-analyzer/$ python -m http.server
 
+## Uploading Traces to S3
+
+Gzip the trace locally:
+
+    $ gzip -9 trace.js
+    $ cp trace.js trace.js.bak
+    $ mv trace.js.gz trace.js
+
+Using the `s3cmd` tool:
+
+    $ s3cmd put trace.js s3://openxcplatform.com/traces/ -P \
+        --add-header "Content-Encoding: gzip"
+
+Or, if you have the trace directory locally:
+
+    $ s3cmd sync traces s3://openxcplatform.com/traces/ -P \
+        --add-header "Content-Encoding: gzip"
+
 License
 =======
 
