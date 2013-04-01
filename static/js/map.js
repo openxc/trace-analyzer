@@ -154,15 +154,23 @@ var mapRenderHandler = {
         }
 
         trace.mapControls.addTo(map);
-        map.addLayer(trace.mapLayerGroups.base);
-        map.fitBounds(trace.mapLayerGroups.base.getBounds());
+        try {
+            map.addLayer(trace.mapLayerGroups.base);
+            map.fitBounds(trace.mapLayerGroups.base.getBounds());
 
-        highlightSlowSections(trace);
-        markLongestStops(trace);
+            highlightSlowSections(trace);
+            markLongestStops(trace);
+        } catch(e) {
+            console.log("Unable to add map path (" + e + ")");
+        }
     },
     onUnload: function(trace) {
         _.each(trace.mapLayerGroups, function(group) {
-            map.removeLayer(group);
+            try {
+                map.removeLayer(group);
+            } catch(e) {
+                console.log("Unable to remove map layer, may have not been added");
+            }
         });
 
         trace.mapControls.removeFrom(map);
