@@ -47,6 +47,7 @@ $(document).ready(function() {
     hoverHandlers.push(timeseriesHoverHandler);
     hoverHandlers.push(mapHoverHandler);
     hoverHandlers.push(gearHistogramHoverHandler);
+    hoverHandlers.push(timestampHoverHandler);
 
     $("#traces .active").each(function(i, e) {
         $(e).click(function(event){
