@@ -34,12 +34,12 @@ var handleMouseOverGraph = function(event, trace, graph) {
 
 var traceStatusHandler = {
     onLoad: function() {
-        $("#trace-status").removeClass();
-        $("#trace-status").addClass("icon-ok");
+        $("#trace-status i").show();
+        $("#trace-status span").hide();
     },
     onUnload: function() {
-        $("#trace-status").removeClass();
-        $("#trace-status").addClass("icon-refresh");
+        $("#trace-status i").hide();
+        $("#trace-status span").show();
     }
 };
 
