@@ -29,7 +29,13 @@ var updateGasPrices = function(trace) {
             }
         }
     });
-}
+};
+
+var recordsWithFuelConsumed =  function(records) {
+    return _.filter(records, function(record) {
+        return record.fuel_consumed_since_restart;
+    });
+};
 
 var fuelConsumedGallons = function(a, b) {
     var fuelConsumedLiters = b.fuel_consumed_since_restart -
@@ -38,8 +44,9 @@ var fuelConsumedGallons = function(a, b) {
 }
 
 var calculateFuelConsumedGallons = function(trace) {
-    return fuelConsumedGallons(_.first(trace.records), _.last(trace.records));
-}
+    var fuelRecords = recordsWithFuelConsumed(trace.records);
+    return fuelConsumedGallons(_.first(fuelRecords), _.last(fuelRecords));
+};
 
 var updateFuelEfficiency = function(trace) {
     trace.overallFuelEfficiency = distanceMiles(_.first(trace.records),
@@ -56,11 +63,12 @@ var updateFuelSummary = function(trace) {
 
 var calculateCumulativeFuelEfficiency = function(trace) {
     var brakeEvents = [];
+    var fuelRecords = recordsWithFuelConsumed(trace.records);
     _.each(trace.records, function(record) {
         // this value could be infinity if we are on electric only power
         record.cumulativeFuelEfficiency =
             distanceMiles(_.first(trace.records), record) /
-                fuelConsumedGallons(_.first(trace.records), record);
+                fuelConsumedGallons(_.first(fuelRecords), record);
 
         if(record.brake_pedal_status) {
             if(brakeEvents.length == 0 || _.last(brakeEvents).end) {

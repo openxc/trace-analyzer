@@ -32,6 +32,7 @@ var processTrace = function(selectedTrace, data) {
     var count = 0;
     var lastLoggedProgress = 0;
     var progressElement = $("#analysis-progress progress");
+    dynamics = {};
     updateProgress(progressElement, 0);
     _.each(data.split("\n"), function(line, i) {
         if(line) {
