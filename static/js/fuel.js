@@ -12,15 +12,15 @@ var updateGasPrices = function(trace) {
             "/" + gasDistance + "/reg/price/" + apiKey + ".json",
         dataType: "jsonp",
         success: function(data) {
-            var stations = data["stations"];
+            var stations = data.stations;
             if(stations && stations.length > 0) {
                 var stationsWithPrice = _.filter(stations, function(station) {
-                    return station.price != "N/A";
+                    return station.price !== "N/A";
                 });
 
                 var averagePrice = _.reduce(stationsWithPrice,
                         function(memo, station) {
-                            return memo + parseInt(station.price);
+                            return memo + parseInt(station.price, 10);
                 }, 0) / stationsWithPrice.length;
 
                 $("#total-fuel-cost").text(averagePrice *
@@ -40,8 +40,8 @@ var recordsWithFuelConsumed =  function(records) {
 var fuelConsumedGallons = function(a, b) {
     var fuelConsumedLiters = b.fuel_consumed_since_restart -
             a.fuel_consumed_since_restart;
-    return fuelConsumedLiters * .264172;
-}
+    return fuelConsumedLiters * 0.264172;
+};
 
 var calculateFuelConsumedGallons = function(trace) {
     var fuelRecords = recordsWithFuelConsumed(trace.records);
@@ -52,14 +52,14 @@ var updateFuelEfficiency = function(trace) {
     trace.overallFuelEfficiency = distanceMiles(_.first(trace.records),
         _.last(trace.records)) / trace.fuelConsumedGallons;
     $("#fuel-efficiency").text(trace.overallFuelEfficiency.toFixed(2)).parent().show();
-}
+};
 
 var updateFuelSummary = function(trace) {
     trace.fuelConsumedGallons = calculateFuelConsumedGallons(trace);
     $("#total-fuel-consumed").text(trace.fuelConsumedGallons.toFixed(2)).parent().show();
     updateGasPrices(trace);
     updateFuelEfficiency(trace);
-}
+};
 
 var calculateCumulativeFuelEfficiency = function(trace) {
     var brakeEvents = [];
@@ -71,7 +71,7 @@ var calculateCumulativeFuelEfficiency = function(trace) {
                 fuelConsumedGallons(_.first(fuelRecords), record);
 
         if(record.brake_pedal_status) {
-            if(brakeEvents.length == 0 || _.last(brakeEvents).end) {
+            if(brakeEvents.length === 0 || _.last(brakeEvents).end) {
                 brakeEvents.push({start: record, end: undefined});
             }
         } else {
@@ -101,4 +101,4 @@ var calculateCumulativeFuelEfficiency = function(trace) {
             .attr("y", 0)
             .attr("height", graphs[key].dimensions.height);
     });
-}
+};
