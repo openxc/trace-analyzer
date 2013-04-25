@@ -3,6 +3,8 @@ OpenXC Vehicle Trace Analysis Tools
 
 * Version: 0.1
 
+This visualization is running at http://openxcplatform.com/trace-analyzer/
+
 ## Running the Visualization
 
 If you have Python 2:
