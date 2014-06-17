@@ -78,9 +78,9 @@ $(document).ready(function() {
         }
         return false;
     }).change();
-
-  function readTraceFile(evt) {
-    var f = evt.target.files[0];
+  
+  $('#uploadTraceInput').change(function(event) {
+    var f = event.target.files[0];
     if (f) {
       var contents = new FileReader();
       contents.onloadend = function(e) {
@@ -96,6 +96,5 @@ $(document).ready(function() {
     } else {
       alert("Failed to load file");
     }
-  }
-  document.getElementById('uploadTraceInput').addEventListener('change', readTraceFile, false);
+  });
 });
