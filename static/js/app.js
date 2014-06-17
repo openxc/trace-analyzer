@@ -43,6 +43,19 @@ var traceStatusHandler = {
     }
 };
 
+var traceFileStatusHandler = {
+    onLoad: function() {
+      $('#upload-modal-close-button').text('Cancel');
+      $('#upload-modal-close-button').removeClass('disabled');
+      $('#upload-modal-close-button').attr('disabled', false);
+    },
+    onUnload: function() {
+      $('#upload-modal-close-button').addClass('disabled');
+      $('#upload-modal-close-button').attr('disabled', true);
+      $('#upload-modal-close-button').text('Loading...')
+    }
+};
+
 $(document).ready(function() {
     map = L.map('map', {zoom: 10});
     L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
@@ -71,7 +84,8 @@ $(document).ready(function() {
         var selectedTrace = $("#traces option:selected").val();
         if(selectedTrace == 'upload') {
           $('#fileUploadModal').modal('show');
-          $('#uploadTraceInput').empty();
+          $('#uploadTraceInput').val(null);
+          traceFileStatusHandler.onLoad();
         } else {
           traceStatusHandler.onUnload();
           loadTrace($("#traces option:selected").val());  
@@ -80,19 +94,15 @@ $(document).ready(function() {
     }).change();
   
   $('#uploadTraceInput').change(function(event) {
+    traceFileStatusHandler.onUnload();
     var f = event.target.files[0];
     if (f) {
       var contents = new FileReader();
       contents.onloadend = function(e) {
-        traceStatusHandler.onUnload();
         processTrace(f.name, contents.result);
         $('#fileUploadModal').modal('hide');
       };
       contents.readAsText(f);
-
-      $('#fileUploadModal').modal('hide');
-      traceStatusHandler.onUnload();
-      processTrace(f.name, contents);
     } else {
       alert("Failed to load file");
     }
