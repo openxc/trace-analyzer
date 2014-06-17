@@ -73,6 +73,7 @@
                     <option value="http://openxcplatform.com.s3.amazonaws.com/traces/idling.json">Idling (no GPS)</option>
                     <option value="http://openxcplatform.com.s3.amazonaws.com/traces/riding-brakes.json">Riding the Brakes (no GPS)</option>
                     <option value="http://openxcplatform.com.s3.amazonaws.com/traces/tailgating.json">Tailgating (no GPS)</option>
+                    <option value="upload">Custom Trace File...</option>
                 </select>
                 <p id="trace-status"><span>Loading...</span><i class="icon-ok"></i></p>
 
@@ -195,6 +196,18 @@
                     <a rel="license" href="http://creativecommons.org/licenses/by/3.0/">Creative Commons Attribution 3.0 License.</a>
                 </p>
             </footer>
+        </div>
+        <div id="fileUploadModal" class="modal hide fade">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h3>Choose trace file</h3>
+          </div>
+          <div class="modal-body">
+            <input id="uploadTraceInput" type="file" accept="application/json">
+          </div>
+          <div class="modal-footer">
+            <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+          </div>
         </div>
     </div>
 
