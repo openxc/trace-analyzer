@@ -15,16 +15,16 @@ var updateGasPrices = function(trace) {
             var stations = data.stations;
             if(stations && stations.length > 0) {
                 var stationsWithPrice = _.filter(stations, function(station) {
-                    return station.reg_price !== "N/A";
+                    return station.price !== "N/A";
                 });
 
                 var averagePrice = _.reduce(stationsWithPrice,
                         function(memo, station) {
-                            return memo + parseInt(station.reg_price, 10);
+                            return memo + parseInt(station.price, 10);
                 }, 0) / stationsWithPrice.length;
 
-                $("#total-fuel-cost").text((averagePrice *
-                    trace.fuelConsumedGallons.toFixed(2)).toFixed(2)).parent().show();
+                $("#total-fuel-cost").text(averagePrice *
+                    trace.fuelConsumedGallons.toFixed(2)).parent().show();
                 $("#average-fuel-cost").text(averagePrice.toFixed(2)).parent().show();
             }
         }
