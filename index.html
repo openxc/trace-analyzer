@@ -12,14 +12,13 @@
     <script type="text/javascript" src="static/js/vendor/aight.js"></script>
     <![endif]-->
     <script src="static/js/vendor/d3.v3.js"></script>
-    <script src="static/js/vendor/box.js"></script>
     <!--[if lt IE 9]>
     <script type="text/javascript" src="static/js/vendor/aight.d3.js"></script>
     <![endif]-->
 
     <link href="static/css/vendor/bootstrap.min.css" rel="stylesheet">
     <link href="static/css/style.css" rel="stylesheet">
-    <title>OpenXC Vehicle Data Visualization</title>    
+    <title>OpenXC Vehicle Data Visualization</title>
 </head>
 
 <body>
@@ -181,14 +180,6 @@
                 <p class="current-data"><span id="current_odometer"></span> Km</p>
             </div>
         </div>
-        <div class="row">
-            <div class="span7 graph-container histogram">
-                <div id="speed_box_plot" class="graph"></div>
-            </div>
-            <div class="span4 graph-comments">
-                <h3>Vehicle speed</h3>                
-            </div>
-        </div>
 
         <div class="row">
             <footer class="span12">
@@ -217,9 +208,7 @@
     <script src="static/js/map.js"></script>
     <script src="static/js/fuel.js"></script>
     <script src="static/js/histogram.js"></script>
-    <script src="static/js/boxplot.js"></script>
     <script src="static/js/app.js"></script>
-    
     <script type="text/javascript">
 
       var _gaq = _gaq || [];
