@@ -86,28 +86,3 @@ img.logo {
 #trace-status {
     display: inline;
 }
-
-/*
-Box plot styles
-*/
-.box {
-  font: 10px sans-serif;
-  padding: 2% 50%;
-}
-
-.box line,
-.box rect,
-.box circle {
-  fill: #fff;
-  stroke: #000;
-  stroke-width: 1.5px;
-}
-
-.box .center {
-  stroke-dasharray: 3,3;
-}
-
-.box .outlier {
-  fill: none;
-  stroke: #ccc;
-}
