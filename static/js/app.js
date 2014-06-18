@@ -57,10 +57,12 @@ $(document).ready(function() {
     onTraceLoadCallbacks.push(updateFuelSummary);
     onTraceLoadCallbacks.push(calculateCumulativeFuelEfficiency);
     onTraceLoadCallbacks.push(drawGearHistogram);
+    onTraceLoadCallbacks.push(boxPlotHandler.onLoad);
 
     onTraceUnloadCallbacks.push(traceStatusHandler.onUnload);
     onTraceUnloadCallbacks.push(timeseriesHandler.onUnload);
     onTraceUnloadCallbacks.push(mapRenderHandler.onUnload);
+    onTraceUnloadCallbacks.push(boxPlotHandler.onUnload);
 
     hoverHandlers.push(timeseriesHoverHandler);
     hoverHandlers.push(mapHoverHandler);
