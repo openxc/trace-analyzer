@@ -23,8 +23,8 @@ var updateGasPrices = function(trace) {
                             return memo + parseInt(station.reg_price, 10);
                 }, 0) / stationsWithPrice.length;
 
-                $("#total-fuel-cost").text(averagePrice *
-                    trace.fuelConsumedGallons.toFixed(2)).parent().show();
+                $("#total-fuel-cost").text((averagePrice *
+                    trace.fuelConsumedGallons.toFixed(2)).toFixed(2)).parent().show();
                 $("#average-fuel-cost").text(averagePrice.toFixed(2)).parent().show();
             }
         }
